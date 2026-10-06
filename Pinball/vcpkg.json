@@ -1,0 +1,14 @@
+{
+  "name": "pinball",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "raylib",
+    "box2d"
+  ],
+  "overrides": [
+    {
+      "name": "box2d",
+      "version": "2.4.1"
+    }
+  ]
+}
