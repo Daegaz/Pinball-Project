@@ -1,18 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\",
+  "WorkspaceRootPath": "C:\\Users\\polmd\\Documents\\GitHub\\Pinball-Project\\Pinball\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E8E6B55A-AE23-4856-9528-BC122E010445}|Pinball.vcxproj|C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{E8E6B55A-AE23-4856-9528-BC122E010445}|Pinball.vcxproj|C:\\Users\\polmd\\Documents\\GitHub\\Pinball-Project\\Pinball\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{E8E6B55A-AE23-4856-9528-BC122E010445}|Pinball.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\vcpkg.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:vcpkg.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\vcpkg-configuration.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:vcpkg-configuration.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,42 +14,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "vcpkg-configuration.json",
-              "DocumentMoniker": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\vcpkg-configuration.json",
-              "RelativeDocumentMoniker": "vcpkg-configuration.json",
-              "ToolTip": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\vcpkg-configuration.json",
-              "RelativeToolTip": "vcpkg-configuration.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-10-06T15:26:58.722Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "vcpkg.json",
-              "DocumentMoniker": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\vcpkg.json",
-              "RelativeDocumentMoniker": "vcpkg.json",
-              "ToolTip": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\vcpkg.json",
-              "RelativeToolTip": "vcpkg.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-10-06T15:26:57.615Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\main.cpp",
+              "DocumentMoniker": "C:\\Users\\polmd\\Documents\\GitHub\\Pinball-Project\\Pinball\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "C:\\Users\\polmr\\Desktop\\Pinball-Project\\Pinball\\main.cpp",
+              "ToolTip": "C:\\Users\\polmd\\Documents\\GitHub\\Pinball-Project\\Pinball\\main.cpp",
               "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-10-06T15:16:42.519Z",
               "EditorCaption": ""
