@@ -1,3 +1,0 @@
-C:\Users\polmr\Desktop\Pinball-Project\Pinball\x64\Debug\raylib.dll
-C:\Users\polmr\Desktop\Pinball-Project\Pinball\x64\Debug\glfw3.dll
-C:\Users\polmr\Desktop\Pinball-Project\Pinball\Pinball\x64\Debug\Pinball.vcxproj.Up2Date
