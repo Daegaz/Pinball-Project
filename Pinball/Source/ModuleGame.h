@@ -31,16 +31,4 @@ public:
 
 	std::vector<PhysicEntity*> entities;
 
-	Texture2D circle;
-	Texture2D box;
-	Texture2D rick;
-
-	uint32 bonus_fx;
-
-	vec2<int> ray;
-	bool ray_on;
-
-	// Sensor at the bottom of the screen
-	PhysBody* sensor;
-	std::vector<PhysBody*> bodies_to_destroy;
 };
