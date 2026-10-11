@@ -17,6 +17,8 @@
 #define METERS_TO_PIXELS(m) ((int) floor(PIXELS_PER_METER * (m)))
 #define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * (p))
 
+//TODO ACUMULADOR !!!!
+
 // Small class to return to other modules to track position and rotation of physics bodies
 class PhysBody
 {
