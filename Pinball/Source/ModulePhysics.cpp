@@ -13,6 +13,7 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 	ground = NULL;
 	mouse_joint = NULL;
 	debug = false;
+	accumulator = 0.0f; 
 }
 
 // Destructor
@@ -38,7 +39,21 @@ bool ModulePhysics::Start()
 
 update_status ModulePhysics::PreUpdate()
 {
-	world->Step(1.0f / 60.0f, 8, 3);
+	//
+	const float fixed_dt = 1.0f / 60.0f; 
+
+	float frame_time = GetFrameTime();
+
+	if (frame_time > 0.25f) {
+		frame_time = 0.25f; 
+	}
+	
+	accumulator += frame_time; 
+
+	while (accumulator >= fixed_dt) {
+		world->Step(1.0f / 60.0f, 8, 3);
+		accumulator -= fixed_dt;
+	}
 
 	return UPDATE_CONTINUE;
 }
