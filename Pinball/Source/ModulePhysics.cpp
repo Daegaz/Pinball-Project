@@ -371,6 +371,45 @@ PhysBody* ModulePhysics::CreateFlipper(int x, int y, const int* points, int size
 	return pbody;
 }
 
+// Dynamic box that can only slide vertically (prismatic joint), from (x, y) down to (x, y + travel)
+PhysBody* ModulePhysics::CreateKicker(int x, int y, int half_width, int half_height, int travel, b2PrismaticJoint** joint)
+{
+	PhysBody* pbody = new PhysBody();
+
+	b2BodyDef body;
+	body.type = b2_dynamicBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.fixedRotation = true; // the plunger never rotates
+	body.bullet = true;
+	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
+
+	b2Body* b = world->CreateBody(&body);
+
+	b2PolygonShape box;
+	box.SetAsBox(PIXEL_TO_METERS(half_width), PIXEL_TO_METERS(half_height));
+
+	b2FixtureDef fixture;
+	fixture.shape = &box;
+	fixture.density = 1.0f;
+	b->CreateFixture(&fixture);
+
+	// Vertical rail: axis (0, 1) points DOWN on screen, so a positive translation = plunger pulled down
+	b2PrismaticJointDef def;
+	def.Initialize(ground, b, b->GetPosition(), b2Vec2(0.0f, 1.0f));
+	def.enableLimit = true;
+	def.lowerTranslation = 0.0f;                     // rest (top)
+	def.upperTranslation = PIXEL_TO_METERS(travel);  // fully charged (bottom)
+	def.enableMotor = true;
+	def.maxMotorForce = 200.0f;
+	def.motorSpeed = 0.0f;
+
+	*joint = (b2PrismaticJoint*)world->CreateJoint(&def);
+
+	pbody->body = b;
+
+	return pbody;
+}
+
 void ModulePhysics::DestroyBody(PhysBody* pbody)
 {
 	if (pbody == NULL)

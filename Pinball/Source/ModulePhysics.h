@@ -53,6 +53,7 @@ public:
 	PhysBody* CreateRectangleSensor(int x, int y, int half_width, int half_height);
 	PhysBody* CreateChain(int x, int y, const int* points, int size);
 	PhysBody* CreateFlipper(int x, int y, const int* points, int size, float lower_angle, float upper_angle, float start_angle, b2RevoluteJoint** joint);
+	PhysBody* CreateKicker(int x, int y, int half_width, int half_height, int travel, b2PrismaticJoint** joint);
 
 	void DestroyBody(PhysBody* pbody);
 

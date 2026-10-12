@@ -22,6 +22,8 @@ public:
 	Texture2D ball_texture;
 	Texture2D flipper_left_texture;
 	Texture2D flipper_right_texture;
+	Texture2D kicker_plunger_texture;
+	Texture2D kicker_spring_texture;
 
 	bool Start();
 	update_status Update();
