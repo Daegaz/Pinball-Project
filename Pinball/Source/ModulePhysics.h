@@ -52,10 +52,13 @@ public:
 	PhysBody* CreateRectangle(int x, int y, int half_width, int half_height);
 	PhysBody* CreateRectangleSensor(int x, int y, int half_width, int half_height);
 	PhysBody* CreateChain(int x, int y, const int* points, int size);
+	PhysBody* CreateFlipper(int x, int y, const int* points, int size, float lower_angle, float upper_angle, float start_angle, b2RevoluteJoint** joint);
 
 	void DestroyBody(PhysBody* pbody);
 
 	void BeginContact(b2Contact* contact) override;
+
+	bool IsDebug() const { return debug; }
 
 private:
 

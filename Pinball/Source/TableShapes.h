@@ -48,3 +48,7 @@ static const int triangle[] = {
 	108, 385, 108, 379, 125, 340, 130, 334, 137, 332,
 	145, 334, 186, 378, 188, 383, 185, 387, 111, 387
 };
+
+// Flipper polygons, relative to the hinge (convex, max 8 points)
+static const int flipper_left_shape[] = { -8, 0, -5, -7, 2, -9, 67, -4, 71, 0, 67, 5, 2, 10, -5, 7 };
+static const int flipper_right_shape[] = { 8, 0, 5, 7, -2, 10, -67, 5, -71, 0, -67, -4, -2, -9, 5, -7 };

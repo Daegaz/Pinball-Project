@@ -63,28 +63,23 @@ void ModuleRender::SetBackgroundColor(Color color)
 	background = color;
 }
 
-// Draw to screen
+// Draw a texture (or a section of it) with its pivot at (x, y), rotated "angle" degrees around that pivot
 bool ModuleRender::Draw(Texture2D texture, int x, int y, const Rectangle* section, double angle, int pivot_x, int pivot_y) const
 {
-	bool ret = true;
+	Rectangle source = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+	if (section != NULL)
+		source = *section;
 
-	float scale = 1.0f;
-    Vector2 position = { (float)x, (float)y };
-    Rectangle rect = { 0.f, 0.f, (float)texture.width, (float)texture.height };
+	// Where the pivot ends up on screen
+	Rectangle dest = { (float)x + camera.x, (float)y + camera.y, source.width, source.height };
 
-    if (section != NULL) rect = *section;
+	// Point of the texture we rotate around (relative to its top-left corner)
+	Vector2 origin = { (float)pivot_x, (float)pivot_y };
 
-    position.x = (float)(x-pivot_x) * scale + camera.x;
-    position.y = (float)(y-pivot_y) * scale + camera.y;
+	DrawTexturePro(texture, source, dest, origin, (float)angle, WHITE);
 
-	rect.width *= scale;
-	rect.height *= scale;
-
-    DrawTextureRec(texture, rect, position, WHITE);
-
-	return ret;
+	return true;
 }
-
 
 bool ModuleRender::DrawText(const char * text, int x, int y, Font font, int spacing, Color tint) const
 {
