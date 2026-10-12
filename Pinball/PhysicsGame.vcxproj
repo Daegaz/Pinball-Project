@@ -191,6 +191,7 @@
     <ClInclude Include="Source\Entities\Entity.h" />
     <ClInclude Include="Source\Entities\Wall.h" />
     <ClInclude Include="Source\ModuleGame.h" />
+    <ClInclude Include="Source\TableShapes.h" />
     <ClInclude Include="Source\Timer.h" />
   </ItemGroup>
   <ItemGroup>

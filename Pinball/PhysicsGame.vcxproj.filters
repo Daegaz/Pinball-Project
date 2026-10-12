@@ -66,6 +66,9 @@
     <ClInclude Include="Source\Entities\Wall.h">
       <Filter>Sources\Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Source\TableShapes.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
