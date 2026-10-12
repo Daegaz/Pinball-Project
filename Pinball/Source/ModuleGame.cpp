@@ -9,7 +9,7 @@
 #include "TableShapes.h"
 #include "Entities/Ball.h"
 #include "Entities/Flipper.h"
-
+#include "Entities/Kicker.h"
 
 #include <algorithm>
 
@@ -31,10 +31,13 @@ bool ModuleGame::Start()
 	ball_texture = LoadTexture("Assets/ball.png");
 	flipper_left_texture = LoadTexture("Assets/left_flipper.png");
 	flipper_right_texture = LoadTexture("Assets/right_flipper.png");
+	kicker_plunger_texture = LoadTexture("Assets/kicker_plunger.png");
+	kicker_spring_texture = LoadTexture("Assets/kicker_3.png");
 
 	SetTextureFilter(flipper_left_texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureFilter(flipper_right_texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureFilter(ball_texture, TEXTURE_FILTER_BILINEAR);
+	SetTextureFilter(kicker_spring_texture, TEXTURE_FILTER_BILINEAR);
 
 	// Static walls of the table (size = number of ints, not of points)
 	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, table_outer, sizeof(table_outer) / sizeof(int))));
@@ -50,10 +53,17 @@ bool ModuleGame::Start()
 	PhysBody* body = App->physics->CreateFlipper(145, 770, flipper_left_shape, sizeof(flipper_left_shape) / sizeof(int), -25.0f, 25.0f, 25.0f, &joint);
 	entities.emplace_back(new Flipper(body, joint, App, flipper_left_texture, 145, 770, 8, 9, KEY_LEFT, true));
 
-
 	body = App->physics->CreateFlipper(320, 770, flipper_right_shape, sizeof(flipper_right_shape) / sizeof(int), -25.0f, 25.0f, -25.0f, &joint);
 	entities.emplace_back(new Flipper(body, joint, App, flipper_right_texture, 320, 770, 71, 9, KEY_RIGHT, false));
 	App->renderer->camera.x = App->renderer->camera.y = 0;
+
+	// Kicker: plunger 30x8 centered in the lane (x 485), resting at y 636, can go 126 px down
+	b2PrismaticJoint* kicker_joint = NULL;
+	PhysBody* kicker_body = App->physics->CreateKicker(485, 636, 15, 4, 126, &kicker_joint);
+	entities.emplace_back(new Kicker(kicker_body, kicker_joint, App, kicker_plunger_texture, kicker_spring_texture, 485, 840));
+
+	// First ball, resting on the plunger
+	entities.emplace_back(new Ball(App->physics->CreateCircle(485, 620, 10), App, ball_texture));
 
 	return true;
 }
@@ -64,6 +74,8 @@ bool ModuleGame::CleanUp()
 	LOG("Unloading game scene");
 
 	DestroyAllEntities();
+	UnloadTexture(kicker_plunger_texture);
+	UnloadTexture(kicker_spring_texture);
 	UnloadTexture(ball_texture);
 	UnloadTexture(flipper_left_texture);
 	UnloadTexture(flipper_right_texture);
