@@ -320,6 +320,57 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 	return pbody;
 }
 
+// Dynamic polygon (points relative to the hinge) attached to the ground at (x, y) with a motorized revolute joint
+PhysBody* ModulePhysics::CreateFlipper(int x, int y, const int* points, int size, float lower_angle, float upper_angle, float start_angle, b2RevoluteJoint** joint)
+{
+	PhysBody* pbody = new PhysBody();
+
+	b2BodyDef body;
+	body.type = b2_dynamicBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	body.angle = start_angle * DEGTORAD;
+	body.bullet = true;
+	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
+
+	b2Body* b = world->CreateBody(&body);
+
+	// Box2D polygons: convex and max 8 vertices
+	int count = size / 2;
+	if (count > b2_maxPolygonVertices)
+		count = b2_maxPolygonVertices;
+
+	b2Vec2 vertices[b2_maxPolygonVertices];
+	for (int i = 0; i < count; ++i)
+		vertices[i].Set(PIXEL_TO_METERS(points[i * 2 + 0]), PIXEL_TO_METERS(points[i * 2 + 1]));
+
+	b2PolygonShape shape;
+	shape.Set(vertices, count);
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+	fixture.density = 1.0f;
+	b->CreateFixture(&fixture);
+
+	// Hinge: the flipper can only rotate around (x, y), between the two limits, pushed by the motor
+	b2RevoluteJointDef def;
+	def.bodyA = ground;
+	def.bodyB = b;
+	def.localAnchorA.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y)); // hinge point in the world
+	def.localAnchorB.Set(0.0f, 0.0f);                               // hinge point in the flipper (its origin)
+	def.enableLimit = true;
+	def.lowerAngle = lower_angle * DEGTORAD;
+	def.upperAngle = upper_angle * DEGTORAD;
+	def.enableMotor = true;
+	def.maxMotorTorque = 100.0f;
+	def.motorSpeed = 0.0f;
+
+	*joint = (b2RevoluteJoint*)world->CreateJoint(&def);
+
+	pbody->body = b;
+
+	return pbody;
+}
+
 void ModulePhysics::DestroyBody(PhysBody* pbody)
 {
 	if (pbody == NULL)

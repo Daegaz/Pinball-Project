@@ -28,6 +28,12 @@
     <ClCompile Include="Source\ModuleGame.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Entities\Ball.cpp">
+      <Filter>Sources\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Entities\Flipper.cpp">
+      <Filter>Sources\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source/p2Point.h">
@@ -68,6 +74,12 @@
     </ClInclude>
     <ClInclude Include="Source\TableShapes.h">
       <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entities\Ball.h">
+      <Filter>Sources\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entities\Flipper.h">
+      <Filter>Sources\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

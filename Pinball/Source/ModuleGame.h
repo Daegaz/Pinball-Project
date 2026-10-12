@@ -19,6 +19,9 @@ public:
 	~ModuleGame();
 
 	Texture2D background;
+	Texture2D ball_texture;
+	Texture2D flipper_left_texture;
+	Texture2D flipper_right_texture;
 
 	bool Start();
 	update_status Update();
