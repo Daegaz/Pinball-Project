@@ -4,29 +4,10 @@
 #include "ModuleGame.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
+#include "Entities/Entity.h"
 
 #include <algorithm>
 
-// Base class for everything in the scene that has a physics body
-class PhysicEntity
-{
-protected:
-
-	PhysicEntity(PhysBody* _body)
-		: body(_body)
-	{
-
-	}
-
-public:
-	virtual ~PhysicEntity() = default;
-
-	// Draw the entity at the position of its body
-	virtual void Update() = 0;
-
-public:
-	PhysBody* body;
-};
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -40,6 +21,7 @@ ModuleGame::~ModuleGame()
 bool ModuleGame::Start()
 {
 	LOG("Loading game scene");
+	background = LoadTexture("Assets/background.png");
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
@@ -52,12 +34,15 @@ bool ModuleGame::CleanUp()
 	LOG("Unloading game scene");
 
 	DestroyAllEntities();
+	UnloadTexture(background);
 
 	return true;
 }
 
 update_status ModuleGame::Update()
 {
+	DrawTexture(background, 0, 0, WHITE);
+
 	for (PhysicEntity* entity : entities)
 	{
 		entity->Update();

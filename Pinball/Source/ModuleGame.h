@@ -18,6 +18,8 @@ public:
 	ModuleGame(Application* app, bool start_enabled = true);
 	~ModuleGame();
 
+	Texture2D background;
+
 	bool Start();
 	update_status Update();
 	bool CleanUp();

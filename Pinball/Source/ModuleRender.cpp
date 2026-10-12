@@ -85,6 +85,7 @@ bool ModuleRender::Draw(Texture2D texture, int x, int y, const Rectangle* sectio
 	return ret;
 }
 
+
 bool ModuleRender::DrawText(const char * text, int x, int y, Font font, int spacing, Color tint) const
 {
     bool ret = true;
