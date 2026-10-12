@@ -5,6 +5,8 @@
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
 #include "Entities/Entity.h"
+#include "Entities/Wall.h"
+#include "TableShapes.h"
 
 #include <algorithm>
 
@@ -21,7 +23,16 @@ ModuleGame::~ModuleGame()
 bool ModuleGame::Start()
 {
 	LOG("Loading game scene");
+
 	background = LoadTexture("Assets/background.png");
+
+	// Static walls of the table (size = number of ints, not of points)
+	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, table_outer, sizeof(table_outer) / sizeof(int))));
+	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, left_rail, sizeof(left_rail) / sizeof(int))));
+	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, inverted_v, sizeof(inverted_v) / sizeof(int))));
+	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, triangle, sizeof(triangle) / sizeof(int))));
+	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, left_flipper_guide, sizeof(left_flipper_guide) / sizeof(int))));
+	entities.emplace_back(new Wall(App->physics->CreateChain(0, 0, right_flipper_guide, sizeof(right_flipper_guide) / sizeof(int))));
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
