@@ -87,6 +87,9 @@
     <ClInclude Include="Source\Entities\Kicker.h">
       <Filter>Sources\Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Entities\DeathZone.h">
+      <Filter>Sources\Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
