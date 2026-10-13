@@ -189,6 +189,7 @@
     <ClInclude Include="Source/ModuleWindow.h" />
     <ClInclude Include="Source/p2Point.h" />
     <ClInclude Include="Source\Entities\Ball.h" />
+    <ClInclude Include="Source\Entities\DeathZone.h" />
     <ClInclude Include="Source\Entities\Entity.h" />
     <ClInclude Include="Source\Entities\Flipper.h" />
     <ClInclude Include="Source\Entities\Kicker.h" />
