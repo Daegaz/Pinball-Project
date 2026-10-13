@@ -49,6 +49,9 @@
     <ClCompile Include="Source\Entities\Crystal.cpp">
       <Filter>Sources\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Entities\RailLight.cpp">
+      <Filter>Sources\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source/p2Point.h">
@@ -87,7 +90,7 @@
     <ClInclude Include="Source\Entities\Wall.h">
       <Filter>Sources\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Source\TableShapes.h">
+    <ClInclude Include="Source\TableLayout.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\Entities\Ball.h">
@@ -112,6 +115,9 @@
       <Filter>Sources\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Source\Entities\Crystal.h">
+      <Filter>Sources\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entities\RailLight.h">
       <Filter>Sources\Entities</Filter>
     </ClInclude>
   </ItemGroup>
