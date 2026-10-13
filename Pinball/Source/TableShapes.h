@@ -52,3 +52,11 @@ static const int triangle[] = {
 // Flipper polygons, relative to the hinge (convex, max 8 points)
 static const int flipper_left_shape[] = { -8, 0, -5, -7, 2, -9, 67, -4, 71, 0, 67, 5, 2, 10, -5, 7 };
 static const int flipper_right_shape[] = { 8, 0, 5, 7, -2, 10, -67, 5, -71, 0, -67, -4, -2, -9, 5, -7 };
+
+// Slingshots: the pink face of the sprite (CLOCKWISE: the ball collides from outside)
+static const int slingshot_left_shape[] = {
+	95, 592, 99, 594, 106, 605, 144, 687, 144, 693, 137, 699, 99, 686, 95, 682
+};
+static const int slingshot_right_shape[] = {
+	370, 592, 370, 682, 366, 686, 328, 699, 321, 693, 321, 687, 360, 603, 366, 594
+};

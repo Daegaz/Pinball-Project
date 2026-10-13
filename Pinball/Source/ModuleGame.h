@@ -22,11 +22,13 @@ enum class GameState
 class PhysBody;
 class PhysicEntity;
 
-// A ball that hit a bumper, waiting for its kick (applied in Update, outside the physics step)
-struct BumperHit
+// A ball that has to be kicked (applied in Update, outside the physics step)
+struct Kick
 {
 	PhysicEntity* ball;
-	PhysicEntity* bumper;
+	float dir_x;   // direction (normalized)
+	float dir_y;
+	float speed;   // m/s added to the ball
 };
 
 class ModuleGame : public Module
@@ -44,6 +46,10 @@ public:
 	Texture2D bumper_textures[3];       // pink, blue, orange
 	Texture2D bumper_light_textures[3];
 	Texture2D bumper_dark_textures[3];
+	Texture2D slingshot_left_texture;
+	Texture2D slingshot_left_hit_texture;
+	Texture2D slingshot_right_texture;
+	Texture2D slingshot_right_hit_texture;
 
 	void DrawUI() const;
 	bool Start();
@@ -75,6 +81,6 @@ public:
 
 	std::vector<PhysicEntity*> entities;
 	std::vector<PhysicEntity*> lost_balls; // balls that fell, removed in Update (never inside the physics step)
-	std::vector<BumperHit> bumper_hits;
+	std::vector<Kick> kicks;
 
 };
