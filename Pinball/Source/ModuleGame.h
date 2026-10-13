@@ -21,6 +21,7 @@ enum class GameState
 
 class PhysBody;
 class PhysicEntity;
+class Crystal;
 
 // A ball that has to be kicked (applied in Update, outside the physics step)
 struct Kick
@@ -50,6 +51,9 @@ public:
 	Texture2D slingshot_left_hit_texture;
 	Texture2D slingshot_right_texture;
 	Texture2D slingshot_right_hit_texture;
+	Texture2D target_off_textures[3]; // orange, blue, pink (top to bottom)
+	Texture2D target_on_textures[3];
+	Texture2D crystal_texture;
 
 	void DrawUI() const;
 	bool Start();
@@ -64,6 +68,10 @@ public:
 
 	void SpawnBall();
 	int CountBalls() const;
+
+	void RespawnCrystals();
+	bool crystals_respawning;
+	Timer crystal_respawn_timer;
 
 	void EndRound();
 
@@ -82,5 +90,5 @@ public:
 	std::vector<PhysicEntity*> entities;
 	std::vector<PhysicEntity*> lost_balls; // balls that fell, removed in Update (never inside the physics step)
 	std::vector<Kick> kicks;
-
+	std::vector<Crystal*> crystals;
 };

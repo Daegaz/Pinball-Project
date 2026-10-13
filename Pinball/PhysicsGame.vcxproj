@@ -190,10 +190,12 @@
     <ClInclude Include="Source/p2Point.h" />
     <ClInclude Include="Source\Entities\Ball.h" />
     <ClInclude Include="Source\Entities\Bumper.h" />
+    <ClInclude Include="Source\Entities\Crystal.h" />
     <ClInclude Include="Source\Entities\DeathZone.h" />
     <ClInclude Include="Source\Entities\Entity.h" />
     <ClInclude Include="Source\Entities\Flipper.h" />
     <ClInclude Include="Source\Entities\Kicker.h" />
+    <ClInclude Include="Source\Entities\LightTarget.h" />
     <ClInclude Include="Source\Entities\Slingshot.h" />
     <ClInclude Include="Source\Entities\Wall.h" />
     <ClInclude Include="Source\ModuleGame.h" />
@@ -210,8 +212,10 @@
     <ClCompile Include="Source/ModuleWindow.cpp" />
     <ClCompile Include="Source\Entities\Ball.cpp" />
     <ClCompile Include="Source\Entities\Bumper.cpp" />
+    <ClCompile Include="Source\Entities\Crystal.cpp" />
     <ClCompile Include="Source\Entities\Flipper.cpp" />
     <ClCompile Include="Source\Entities\Kicker.cpp" />
+    <ClCompile Include="Source\Entities\LightTarget.cpp" />
     <ClCompile Include="Source\Entities\Slingshot.cpp" />
     <ClCompile Include="Source\ModuleGame.cpp" />
     <ClCompile Include="Source\Timer.cpp" />
