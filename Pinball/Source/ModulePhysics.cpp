@@ -215,12 +215,12 @@ bool ModulePhysics::CleanUp()
 }
 
 // PhysBody pointer as UserData: set it in the b2BodyDef BEFORE calling CreateBody()
-PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
+PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, bool dynamic)
 {
 	PhysBody* pbody = new PhysBody();
 
 	b2BodyDef body;
-	body.type = b2_dynamicBody;
+	body.type = dynamic ? b2_dynamicBody : b2_staticBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 

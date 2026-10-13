@@ -11,12 +11,18 @@
 #include "Entities/Flipper.h"
 #include "Entities/Kicker.h"
 #include "Entities/DeathZone.h"
+#include "Entities/Bumper.h"
 
 #include <algorithm>
 
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
+	state = GameState::PLAYING;
+	balls_left = BALLS_PER_ROUND;
+	score = 0;
+	previous_score = 0;
+	highest_score = 0;
 }
 
 ModuleGame::~ModuleGame()
@@ -52,6 +58,26 @@ bool ModuleGame::Start()
 	AddEntity(new Wall(App->physics->CreateChain(0, 0, left_flipper_guide, sizeof(left_flipper_guide) / sizeof(int))));
 	AddEntity(new Wall(App->physics->CreateChain(0, 0, right_flipper_guide, sizeof(right_flipper_guide) / sizeof(int))));
 
+	// Bumpers: textures (same order everywhere: pink, blue, orange)
+	const char* bumper_colors[3] = { "pink", "blue", "orange" };
+	for (int i = 0; i < 3; ++i)
+	{
+		bumper_textures[i] = LoadTexture(TextFormat("Assets/bumper_%s.png", bumper_colors[i]));
+		bumper_light_textures[i] = LoadTexture(TextFormat("Assets/bumper_%s_light.png", bumper_colors[i]));
+		bumper_dark_textures[i] = LoadTexture(TextFormat("Assets/bumper_%s_dark.png", bumper_colors[i]));
+		SetTextureFilter(bumper_textures[i], TEXTURE_FILTER_BILINEAR);
+		SetTextureFilter(bumper_light_textures[i], TEXTURE_FILTER_BILINEAR);
+		SetTextureFilter(bumper_dark_textures[i], TEXTURE_FILTER_BILINEAR);
+	}
+
+	// Bumpers: static circles at the positions of the reference table
+	const int bumper_pos[3][2] = { { 350, 202 }, { 240, 203 }, { 303, 310 } };
+	for (int i = 0; i < 3; ++i)
+	{
+		PhysBody* bumper_body = App->physics->CreateCircle(bumper_pos[i][0], bumper_pos[i][1], BUMPER_RADIUS, false);
+		AddEntity(new Bumper(bumper_body, App, bumper_textures[i], bumper_light_textures[i], bumper_dark_textures[i]));
+	}
+
 	// Lost ball sensor: the drain between the flippers (x 150..310, bottom of the screen)
 	AddEntity(new DeathZone(App->physics->CreateRectangleSensor(230, 885, 80, 10)));
 
@@ -70,7 +96,7 @@ bool ModuleGame::Start()
 	AddEntity(new Kicker(kicker_body, kicker_joint, App, kicker_plunger_texture, kicker_spring_texture, 485, 840));
 
 	// First ball, resting on the plunger
-	SpawnBall();
+	StartRound();
 
 	return true;
 }
@@ -81,6 +107,12 @@ bool ModuleGame::CleanUp()
 	LOG("Unloading game scene");
 
 	DestroyAllEntities();
+	for (int i = 0; i < 3; ++i)
+	{
+		UnloadTexture(bumper_textures[i]);
+		UnloadTexture(bumper_light_textures[i]);
+		UnloadTexture(bumper_dark_textures[i]);
+	}
 	UnloadTexture(kicker_plunger_texture);
 	UnloadTexture(kicker_spring_texture);
 	UnloadTexture(ball_texture);
@@ -96,6 +128,20 @@ update_status ModuleGame::Update()
 {
 	DrawTexture(background, 0, 0, WHITE);
 
+	// Game over: wait a few seconds and start the next round automatically
+	if (state == GameState::GAME_OVER && game_over_timer.ReadSec() >= GAME_OVER_SECONDS)
+		StartRound();
+
+	// Bumper kicks: push each ball away from the center of the bumper it hit
+	for (const BumperHit& hit : bumper_hits)
+	{
+		b2Body* ball = hit.ball->body->body;
+		b2Vec2 direction = ball->GetPosition() - hit.bumper->body->body->GetPosition();
+		direction.Normalize();
+		ball->ApplyLinearImpulseToCenter(BUMPER_KICK * ball->GetMass() * direction, true);
+	}
+	bumper_hits.clear();
+
 	// Remove the lost balls here, safely outside the physics step
 	if (!lost_balls.empty())
 	{
@@ -103,9 +149,16 @@ update_status ModuleGame::Update()
 			DestroyEntity(ball);
 		lost_balls.clear();
 
-		// No balls left on the table: a new one on the kicker
-		if (CountBalls() == 0)
-			SpawnBall();
+		// No balls left on the table: one less for this round (only while playing)
+		if (CountBalls() == 0 && state == GameState::PLAYING)
+		{
+			--balls_left;
+
+			if (balls_left > 0)
+				SpawnBall();
+			else
+				EndRound();
+		}
 	}
 
 	// Debug: right click spawns a ball at the mouse
@@ -118,6 +171,8 @@ update_status ModuleGame::Update()
 	{
 		entity->Update();
 	}
+
+	DrawUI();
 
 	return UPDATE_CONTINUE;
 }
@@ -139,6 +194,13 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		// Only mark it: we can't destroy bodies while Box2D is stepping
 		if (std::find(lost_balls.begin(), lost_balls.end(), bodyA->entity) == lost_balls.end())
 			lost_balls.push_back(bodyA->entity);
+	}
+	// Ball hits a bumper: points and flash now, the kick later
+	if (type_a == EntityType::BALL && type_b == EntityType::BUMPER)
+	{
+		score += BUMPER_POINTS;
+		bodyB->entity->OnHit(bodyA->entity);
+		bumper_hits.push_back({ bodyA->entity, bodyB->entity });
 	}
 }
 
@@ -166,6 +228,56 @@ int ModuleGame::CountBalls() const
 			++count;
 	}
 	return count;
+}
+
+// Round finished: save the scores and wait for the next round
+void ModuleGame::EndRound()
+{
+	previous_score = score;
+	if (score > highest_score)
+		highest_score = score;
+
+	state = GameState::GAME_OVER;
+	LOG("Game over! Score: %d", score);
+	game_over_timer.Start();
+}
+
+// Draws "text" right-aligned so it ends at x_right, vertically centered on center_y
+static void DrawTextRight(const char* text, int x_right, int center_y, int size, Color color)
+{
+	DrawText(text, x_right - MeasureText(text, size), center_y - size / 2, size, color);
+}
+
+// Numbers inside the panels of the background (the labels are already in the image)
+void ModuleGame::DrawUI() const
+{
+	DrawTextRight(TextFormat("%d", score), 116, 27, 20, WHITE);
+	DrawTextRight(TextFormat("%d", balls_left), 494, 27, 20, WHITE);
+	DrawTextRight(TextFormat("%d", previous_score), 122, 837, 14, WHITE);
+	DrawTextRight(TextFormat("%d", highest_score), 450, 837, 14, WHITE);
+
+	// Game over banner in the middle of the screen
+	if (state == GameState::GAME_OVER)
+	{
+		DrawRectangle(0, SCREEN_HEIGHT / 2 - 50, SCREEN_WIDTH, 100, Fade(BLACK, 0.7f));
+
+		const char* title = "GAME OVER";
+		DrawText(title, (SCREEN_WIDTH - MeasureText(title, 40)) / 2, SCREEN_HEIGHT / 2 - 32, 40, WHITE);
+
+		const char* result = TextFormat("Score: %d", previous_score);
+		DrawText(result, (SCREEN_WIDTH - MeasureText(result, 20)) / 2, SCREEN_HEIGHT / 2 + 14, 20, LIGHTGRAY);
+	}
+}
+
+// New round: reset the round values and put a ball on the kicker
+void ModuleGame::StartRound()
+{
+	score = 0;
+	balls_left = BALLS_PER_ROUND;
+	state = GameState::PLAYING;
+	SpawnBall();
+
+	LOG("New round");
 }
 
 void ModuleGame::DestroyEntity(PhysicEntity* entity)
