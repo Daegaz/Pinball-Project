@@ -12,6 +12,7 @@
 #include "Entities/Kicker.h"
 #include "Entities/DeathZone.h"
 #include "Entities/Bumper.h"
+#include "Entities/Slingshot.h"
 
 #include <algorithm>
 
@@ -43,6 +44,10 @@ bool ModuleGame::Start()
 	flipper_right_texture = LoadTexture("Assets/right_flipper.png");
 	kicker_plunger_texture = LoadTexture("Assets/kicker_plunger.png");
 	kicker_spring_texture = LoadTexture("Assets/kicker_3.png");
+	slingshot_left_texture = LoadTexture("Assets/slingshot_left.png");
+	slingshot_left_hit_texture = LoadTexture("Assets/slingshot_left_hit.png");
+	slingshot_right_texture = LoadTexture("Assets/slingshot_right.png");
+	slingshot_right_hit_texture = LoadTexture("Assets/slingshot_right_hit.png");
 
 	// Smooth filtering: small sprites look better when rotated or squashed
 	SetTextureFilter(ball_texture, TEXTURE_FILTER_BILINEAR);
@@ -77,6 +82,12 @@ bool ModuleGame::Start()
 		PhysBody* bumper_body = App->physics->CreateCircle(bumper_pos[i][0], bumper_pos[i][1], BUMPER_RADIUS, false);
 		AddEntity(new Bumper(bumper_body, App, bumper_textures[i], bumper_light_textures[i], bumper_dark_textures[i]));
 	}
+
+	// Slingshots: chain of their face + the rubber line (the diagonal), ordered so its outer side is on the left of a -> b
+	AddEntity(new Slingshot(App->physics->CreateChain(0, 0, slingshot_left_shape, sizeof(slingshot_left_shape) / sizeof(int)),
+		App, slingshot_left_texture, slingshot_left_hit_texture, 92, 592, false, 106, 605, 144, 687));
+	AddEntity(new Slingshot(App->physics->CreateChain(0, 0, slingshot_right_shape, sizeof(slingshot_right_shape) / sizeof(int)),
+		App, slingshot_right_texture, slingshot_right_hit_texture, 321, 592, true, 321, 687, 360, 603));
 
 	// Lost ball sensor: the drain between the flippers (x 150..310, bottom of the screen)
 	AddEntity(new DeathZone(App->physics->CreateRectangleSensor(230, 885, 80, 10)));
@@ -113,6 +124,10 @@ bool ModuleGame::CleanUp()
 		UnloadTexture(bumper_light_textures[i]);
 		UnloadTexture(bumper_dark_textures[i]);
 	}
+	UnloadTexture(slingshot_left_texture);
+	UnloadTexture(slingshot_left_hit_texture);
+	UnloadTexture(slingshot_right_texture);
+	UnloadTexture(slingshot_right_hit_texture);
 	UnloadTexture(kicker_plunger_texture);
 	UnloadTexture(kicker_spring_texture);
 	UnloadTexture(ball_texture);
@@ -132,15 +147,14 @@ update_status ModuleGame::Update()
 	if (state == GameState::GAME_OVER && game_over_timer.ReadSec() >= GAME_OVER_SECONDS)
 		StartRound();
 
-	// Bumper kicks: push each ball away from the center of the bumper it hit
-	for (const BumperHit& hit : bumper_hits)
+	// Kicks from bumpers and slingshots (outside the physics step)
+	for (const Kick& kick : kicks)
 	{
-		b2Body* ball = hit.ball->body->body;
-		b2Vec2 direction = ball->GetPosition() - hit.bumper->body->body->GetPosition();
-		direction.Normalize();
-		ball->ApplyLinearImpulseToCenter(BUMPER_KICK * ball->GetMass() * direction, true);
+		b2Body* ball = kick.ball->body->body;
+		b2Vec2 direction(kick.dir_x, kick.dir_y);
+		ball->ApplyLinearImpulseToCenter(kick.speed * ball->GetMass() * direction, true);
 	}
-	bumper_hits.clear();
+	kicks.clear();
 
 	// Remove the lost balls here, safely outside the physics step
 	if (!lost_balls.empty())
@@ -195,12 +209,28 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		if (std::find(lost_balls.begin(), lost_balls.end(), bodyA->entity) == lost_balls.end())
 			lost_balls.push_back(bodyA->entity);
 	}
-	// Ball hits a bumper: points and flash now, the kick later
+	// Ball hits a bumper: points, flash and a kick away from its center
 	if (type_a == EntityType::BALL && type_b == EntityType::BUMPER)
 	{
 		score += BUMPER_POINTS;
 		bodyB->entity->OnHit(bodyA->entity);
-		bumper_hits.push_back({ bodyA->entity, bodyB->entity });
+
+		b2Vec2 direction = bodyA->body->GetPosition() - bodyB->body->GetPosition();
+		direction.Normalize();
+		kicks.push_back({ bodyA->entity, direction.x, direction.y, BUMPER_KICK });
+	}
+	// Ball hits a slingshot: only the rubber (the diagonal) kicks, the straight sides just bounce
+	if (type_a == EntityType::BALL && type_b == EntityType::SLINGSHOT)
+	{
+		Slingshot* slingshot = (Slingshot*)bodyB->entity;
+		b2Vec2 ball_pos = bodyA->body->GetPosition();
+
+		if (slingshot->IsInFrontOfRubber(METERS_TO_PIXELS(ball_pos.x), METERS_TO_PIXELS(ball_pos.y)))
+		{
+			score += SLINGSHOT_POINTS;
+			slingshot->OnHit(bodyA->entity);
+			kicks.push_back({ bodyA->entity, slingshot->normal_x, slingshot->normal_y, SLINGSHOT_KICK });
+		}
 	}
 }
 
