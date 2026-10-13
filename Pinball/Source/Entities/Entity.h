@@ -12,7 +12,8 @@ enum class EntityType
 	BUMPER,
 	SLINGSHOT,
 	LIGHT_TARGET,
-	DEATH_ZONE
+	DEATH_ZONE,
+	CRYSTAL
 };
 
 // Base class for everything in the scene that has a physics body

@@ -43,6 +43,12 @@
     <ClCompile Include="Source\Entities\Slingshot.cpp">
       <Filter>Sources\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Entities\LightTarget.cpp">
+      <Filter>Sources\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Entities\Crystal.cpp">
+      <Filter>Sources\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source/p2Point.h">
@@ -100,6 +106,12 @@
       <Filter>Sources\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Source\Entities\Slingshot.h">
+      <Filter>Sources\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entities\LightTarget.h">
+      <Filter>Sources\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entities\Crystal.h">
       <Filter>Sources\Entities</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,8 @@
 #include "Entities/DeathZone.h"
 #include "Entities/Bumper.h"
 #include "Entities/Slingshot.h"
+#include "Entities/LightTarget.h"
+#include "Entities/Crystal.h"
 
 #include <algorithm>
 
@@ -24,6 +26,7 @@ ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start
 	score = 0;
 	previous_score = 0;
 	highest_score = 0;
+	crystals_respawning = false;
 }
 
 ModuleGame::~ModuleGame()
@@ -48,12 +51,23 @@ bool ModuleGame::Start()
 	slingshot_left_hit_texture = LoadTexture("Assets/slingshot_left_hit.png");
 	slingshot_right_texture = LoadTexture("Assets/slingshot_right.png");
 	slingshot_right_hit_texture = LoadTexture("Assets/slingshot_right_hit.png");
+	crystal_texture = LoadTexture("Assets/crystal.png");
+
+	// Side light targets: textures (top to bottom: orange, blue, pink)
+	const char* target_colors[3] = { "orange", "blue", "pink" };
+	for (int i = 0; i < 3; ++i)
+	{
+		target_off_textures[i] = LoadTexture(TextFormat("Assets/target_%s_off.png", target_colors[i]));
+		target_on_textures[i] = LoadTexture(TextFormat("Assets/target_%s_on.png", target_colors[i]));
+	}
+
 
 	// Smooth filtering: small sprites look better when rotated or squashed
 	SetTextureFilter(ball_texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureFilter(flipper_left_texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureFilter(flipper_right_texture, TEXTURE_FILTER_BILINEAR);
 	SetTextureFilter(kicker_spring_texture, TEXTURE_FILTER_BILINEAR);
+	SetTextureFilter(crystal_texture, TEXTURE_FILTER_BILINEAR);
 
 	// Static walls of the table (size = number of ints, not of points) -----
 	AddEntity(new Wall(App->physics->CreateChain(0, 0, table_outer, sizeof(table_outer) / sizeof(int))));
@@ -89,6 +103,27 @@ bool ModuleGame::Start()
 	AddEntity(new Slingshot(App->physics->CreateChain(0, 0, slingshot_right_shape, sizeof(slingshot_right_shape) / sizeof(int)),
 		App, slingshot_right_texture, slingshot_right_hit_texture, 321, 592, true, 321, 687, 360, 603));
 
+	// Side light targets: 3 on each wall, static boxes 7x34 just in front of the wall
+	const int target_left_y[3] = { 420, 457, 494 };
+	const int target_right_y[3] = { 429, 466, 503 };
+	for (int i = 0; i < 3; ++i)
+	{
+		AddEntity(new LightTarget(App->physics->CreateRectangle(16, target_left_y[i] + 18, 3, 17, false),
+			App, target_off_textures[i], target_on_textures[i], 13, target_left_y[i], 1.0f));
+		AddEntity(new LightTarget(App->physics->CreateRectangle(411, target_right_y[i] + 18, 3, 17, false),
+			App, target_off_textures[i], target_on_textures[i], 408, target_right_y[i], -1.0f));
+	}
+
+	// Crystals: collectibles (sensors). Above the V, in the right diagonal slot, above the bumpers
+	const int crystal_pos[3][2] = { { 292, 94 }, { 442, 290 }, { 133, 302 } };
+	for (int i = 0; i < 3; ++i)
+	{
+		PhysBody* crystal_body = App->physics->CreateRectangleSensor(crystal_pos[i][0], crystal_pos[i][1], 10, 14);
+		Crystal* crystal = new Crystal(crystal_body, App, crystal_texture, crystal_pos[i][0], crystal_pos[i][1], i * 0.6f);
+		crystals.push_back(crystal);
+		AddEntity(crystal);
+	}
+
 	// Lost ball sensor: the drain between the flippers (x 150..310, bottom of the screen)
 	AddEntity(new DeathZone(App->physics->CreateRectangleSensor(230, 885, 80, 10)));
 
@@ -117,6 +152,8 @@ bool ModuleGame::CleanUp()
 {
 	LOG("Unloading game scene");
 
+	crystals.clear(); // the crystals are deleted with the rest of the entities
+
 	DestroyAllEntities();
 	for (int i = 0; i < 3; ++i)
 	{
@@ -124,6 +161,12 @@ bool ModuleGame::CleanUp()
 		UnloadTexture(bumper_light_textures[i]);
 		UnloadTexture(bumper_dark_textures[i]);
 	}
+	for (int i = 0; i < 3; ++i)
+	{
+		UnloadTexture(target_off_textures[i]);
+		UnloadTexture(target_on_textures[i]);
+	}
+	UnloadTexture(crystal_texture);
 	UnloadTexture(slingshot_left_texture);
 	UnloadTexture(slingshot_left_hit_texture);
 	UnloadTexture(slingshot_right_texture);
@@ -146,6 +189,10 @@ update_status ModuleGame::Update()
 	// Game over: wait a few seconds and start the next round automatically
 	if (state == GameState::GAME_OVER && game_over_timer.ReadSec() >= GAME_OVER_SECONDS)
 		StartRound();
+
+	// Crystals come back a few seconds after the combo
+	if (crystals_respawning && crystal_respawn_timer.ReadSec() >= CRYSTAL_RESPAWN_TIME)
+		RespawnCrystals();
 
 	// Kicks from bumpers and slingshots (outside the physics step)
 	for (const Kick& kick : kicks)
@@ -232,6 +279,40 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			kicks.push_back({ bodyA->entity, slingshot->normal_x, slingshot->normal_y, SLINGSHOT_KICK });
 		}
 	}
+	// Ball hits a side target: points, it lights up and the ball bounces off the wall
+	if (type_a == EntityType::BALL && type_b == EntityType::LIGHT_TARGET)
+	{
+		LightTarget* target = (LightTarget*)bodyB->entity;
+		score += TARGET_POINTS;
+		target->OnHit(bodyA->entity);
+		kicks.push_back({ bodyA->entity, target->kick_x, 0.0f, TARGET_KICK });
+	}
+	// Ball collects a crystal. Collect the 3 -> extra ball + bonus, and they come back after a delay
+	if (type_a == EntityType::BALL && type_b == EntityType::CRYSTAL)
+	{
+		Crystal* crystal = (Crystal*)bodyB->entity;
+		if (!crystal->IsCollected())
+		{
+			crystal->OnHit(bodyA->entity);
+			score += CRYSTAL_POINTS;
+
+			bool all_collected = true;
+			for (Crystal* c : crystals)
+			{
+				if (!c->IsCollected())
+					all_collected = false;
+			}
+
+			if (all_collected)
+			{
+				++balls_left;
+				score += CRYSTAL_COMBO_POINTS;
+				crystals_respawning = true;
+				crystal_respawn_timer.Start();
+				LOG("Combo! Extra ball");
+			}
+		}
+	}
 }
 
 // Every entity goes through here: link body <-> entity and listen to its collisions
@@ -258,6 +339,15 @@ int ModuleGame::CountBalls() const
 			++count;
 	}
 	return count;
+}
+
+// The 3 crystals come back
+void ModuleGame::RespawnCrystals()
+{
+	for (Crystal* crystal : crystals)
+		crystal->Respawn();
+
+	crystals_respawning = false;
 }
 
 // Round finished: save the scores and wait for the next round
@@ -306,6 +396,7 @@ void ModuleGame::StartRound()
 	balls_left = BALLS_PER_ROUND;
 	state = GameState::PLAYING;
 	SpawnBall();
+	RespawnCrystals();
 
 	LOG("New round");
 }
