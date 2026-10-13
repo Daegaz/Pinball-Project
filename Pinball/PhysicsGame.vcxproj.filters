@@ -37,6 +37,9 @@
     <ClCompile Include="Source\Entities\Kicker.cpp">
       <Filter>Sources\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Entities\Bumper.cpp">
+      <Filter>Sources\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source/p2Point.h">
@@ -88,6 +91,9 @@
       <Filter>Sources\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Source\Entities\DeathZone.h">
+      <Filter>Sources\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entities\Bumper.h">
       <Filter>Sources\Entities</Filter>
     </ClInclude>
   </ItemGroup>

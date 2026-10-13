@@ -45,7 +45,7 @@ update_status ModuleRender::Update()
 update_status ModuleRender::PostUpdate()
 {
     // Draw everything in our batch!
-    DrawFPS(10, 10);
+    DrawFPS(10, 50);
 
     EndDrawing();
 
@@ -63,18 +63,18 @@ void ModuleRender::SetBackgroundColor(Color color)
 	background = color;
 }
 
-// Draw a texture (or a section of it) with its pivot at (x, y), rotated "angle" degrees around that pivot
-bool ModuleRender::Draw(Texture2D texture, int x, int y, const Rectangle* section, double angle, int pivot_x, int pivot_y) const
+// Draw a texture (or a section of it) with its pivot at (x, y), rotated "angle" degrees and scaled around that pivot
+bool ModuleRender::Draw(Texture2D texture, int x, int y, const Rectangle* section, double angle, int pivot_x, int pivot_y, float scale) const
 {
 	Rectangle source = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
 	if (section != NULL)
 		source = *section;
 
-	// Where the pivot ends up on screen
-	Rectangle dest = { (float)x + camera.x, (float)y + camera.y, source.width, source.height };
+	// Where the pivot ends up on screen, and the size once scaled
+	Rectangle dest = { (float)x + camera.x, (float)y + camera.y, source.width * scale, source.height * scale };
 
-	// Point of the texture we rotate around (relative to its top-left corner)
-	Vector2 origin = { (float)pivot_x, (float)pivot_y };
+	// Pivot scaled too, so the texture grows around it (not from its corner)
+	Vector2 origin = { pivot_x * scale, pivot_y * scale };
 
 	DrawTexturePro(texture, source, dest, origin, (float)angle, WHITE);
 
