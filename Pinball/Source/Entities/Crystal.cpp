@@ -6,7 +6,7 @@
 
 #define FLOAT_HEIGHT 4.0f  // pixels it rises
 #define FLOAT_MOVE 0.6f    // seconds of the quick up-and-down
-#define FLOAT_CYCLE 2.0f   // seconds of a full cycle (move + rest)
+#define FLOAT_CYCLE 1.3f   // seconds of a full cycle (move + rest)
 #define APPEAR_TIME 0.4f // seconds of the "pop-in" when it comes back
 
 Crystal::Crystal(PhysBody* body, Application* app, Texture2D texture, int x, int y, float phase)

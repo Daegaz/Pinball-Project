@@ -13,7 +13,8 @@ enum class EntityType
 	SLINGSHOT,
 	LIGHT_TARGET,
 	DEATH_ZONE,
-	CRYSTAL
+	CRYSTAL,
+	RAIL_LIGHT
 };
 
 // Base class for everything in the scene that has a physics body

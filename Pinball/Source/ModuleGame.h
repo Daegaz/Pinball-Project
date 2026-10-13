@@ -22,6 +22,9 @@ enum class GameState
 class PhysBody;
 class PhysicEntity;
 class Crystal;
+class RailLight;
+
+struct DecoArrow;
 
 // A ball that has to be kicked (applied in Update, outside the physics step)
 struct Kick
@@ -54,11 +57,22 @@ public:
 	Texture2D target_off_textures[3]; // orange, blue, pink (top to bottom)
 	Texture2D target_on_textures[3];
 	Texture2D crystal_texture;
+	Texture2D arrow_off_texture;
+	Texture2D arrow_on_texture;
+	Texture2D arrow_blue_off_texture;
+	Texture2D arrow_blue_on_texture;
+	Texture2D rail_light_dark_texture;
+	Texture2D rail_light_light_texture;
 
 	void DrawUI() const;
+	void DrawDecorations() const;
+	void DrawArrowChase(const DecoArrow* arrows, int count, int steps, Texture2D off, Texture2D on) const;
 	bool Start();
 	update_status Update();
 	bool CleanUp();
+
+	void LoadTextures();
+	void CreateTable();
 
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB) override;
 	void AddEntity(PhysicEntity* entity);
@@ -73,7 +87,12 @@ public:
 	bool crystals_respawning;
 	Timer crystal_respawn_timer;
 
+	void ResetRailLights();
+	bool rail_combo_showing;             // the 5 are lit, waiting to go back to blinking
+	Timer rail_combo_timer;
+
 	void EndRound();
+	Timer game_over_timer;
 
 	GameState state;
 	int balls_left;      // balls still to play in this round (including the one on the table)
@@ -83,7 +102,7 @@ public:
 
 	void StartRound();
 
-	Timer game_over_timer;
+
 
 public:
 
@@ -91,4 +110,6 @@ public:
 	std::vector<PhysicEntity*> lost_balls; // balls that fell, removed in Update (never inside the physics step)
 	std::vector<Kick> kicks;
 	std::vector<Crystal*> crystals;
+	std::vector<RailLight*> rail_lights; // also in entities: only to handle the group
+
 };

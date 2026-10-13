@@ -196,10 +196,11 @@
     <ClInclude Include="Source\Entities\Flipper.h" />
     <ClInclude Include="Source\Entities\Kicker.h" />
     <ClInclude Include="Source\Entities\LightTarget.h" />
+    <ClInclude Include="Source\Entities\RailLight.h" />
     <ClInclude Include="Source\Entities\Slingshot.h" />
     <ClInclude Include="Source\Entities\Wall.h" />
     <ClInclude Include="Source\ModuleGame.h" />
-    <ClInclude Include="Source\TableShapes.h" />
+    <ClInclude Include="Source\TableLayout.h" />
     <ClInclude Include="Source\Timer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +217,7 @@
     <ClCompile Include="Source\Entities\Flipper.cpp" />
     <ClCompile Include="Source\Entities\Kicker.cpp" />
     <ClCompile Include="Source\Entities\LightTarget.cpp" />
+    <ClCompile Include="Source\Entities\RailLight.cpp" />
     <ClCompile Include="Source\Entities\Slingshot.cpp" />
     <ClCompile Include="Source\ModuleGame.cpp" />
     <ClCompile Include="Source\Timer.cpp" />
