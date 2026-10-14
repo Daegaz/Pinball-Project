@@ -86,6 +86,17 @@ void ModuleGame::LoadTextures()
 	rail_light_dark_texture = LoadSmooth("Assets/bumper_orange_dark.png");
 	rail_light_light_texture = LoadSmooth("Assets/bumper_orange_light.png");
 
+	arrow_pink_off_texture = LoadSmooth("Assets/arrow_pink_off.png");
+	arrow_pink_on_texture = LoadSmooth("Assets/arrow_pink_on.png");
+
+	arrow_up_orange_off_texture = LoadSmooth("Assets/arrow_up_orange_off.png");
+	arrow_up_orange_on_texture = LoadSmooth("Assets/arrow_up_orange_on.png");
+	triangle_orange_off_texture = LoadSmooth("Assets/triangle_orange_off.png");
+	triangle_orange_on_texture = LoadSmooth("Assets/triangle_orange_on.png");
+
+	triangle_pink_off_texture = LoadSmooth("Assets/triangle_pink_off.png");
+	triangle_pink_on_texture = LoadSmooth("Assets/triangle_pink_on.png");
+
 	// Bumpers (pink, blue, orange)
 	const char* bumper_colors[3] = { "pink", "blue", "orange" };
 	for (int i = 0; i < 3; ++i)
@@ -203,6 +214,14 @@ bool ModuleGame::CleanUp()
 		UnloadTexture(target_off_textures[i]);
 		UnloadTexture(target_on_textures[i]);
 	}
+	UnloadTexture(triangle_pink_off_texture);
+	UnloadTexture(triangle_pink_on_texture);
+	UnloadTexture(triangle_orange_off_texture);
+	UnloadTexture(triangle_orange_on_texture);
+	UnloadTexture(arrow_up_orange_off_texture);
+	UnloadTexture(arrow_up_orange_on_texture);
+	UnloadTexture(arrow_pink_off_texture);
+	UnloadTexture(arrow_pink_on_texture);
 	UnloadTexture(rail_light_dark_texture);
 	UnloadTexture(rail_light_light_texture);
 	UnloadTexture(arrow_blue_off_texture);
@@ -227,7 +246,6 @@ bool ModuleGame::CleanUp()
 
 update_status ModuleGame::Update()
 {
-	DrawTexture(background, 0, 0, WHITE);
 	DrawTexture(background, 0, 0, WHITE);
 	DrawDecorations();
 
@@ -490,7 +508,7 @@ void ModuleGame::DrawUI() const
 }
 
 // A group of arrows lit one step at a time ("chase"): "steps" = how many different steps the group has
-void ModuleGame::DrawArrowChase(const DecoArrow* arrows, int count, int steps, Texture2D off, Texture2D on) const
+void ModuleGame::DrawArrowChase(const DecoArrow* arrows, int count, int steps, Texture2D off, Texture2D on, Color tint) const
 {
 	int lit_step = (int)(GetTime() / CHASE_STEP) % steps;
 
@@ -498,7 +516,7 @@ void ModuleGame::DrawArrowChase(const DecoArrow* arrows, int count, int steps, T
 	{
 		const DecoArrow& arrow = arrows[i];
 		Texture2D texture = (arrow.step == lit_step) ? on : off;
-		App->renderer->Draw(texture, arrow.x, arrow.y, NULL, arrow.angle, texture.width / 2, texture.height / 2);
+		App->renderer->Draw(texture, arrow.x, arrow.y, NULL, arrow.angle, texture.width / 2, texture.height / 2, 1.0f, tint);
 	}
 }
 
@@ -507,6 +525,13 @@ void ModuleGame::DrawDecorations() const
 {
 	DrawArrowChase(side_arrows, sizeof(side_arrows) / sizeof(DecoArrow), 3, arrow_off_texture, arrow_on_texture);
 	DrawArrowChase(center_arrows, sizeof(center_arrows) / sizeof(DecoArrow), 4, arrow_blue_off_texture, arrow_blue_on_texture);
+
+	DrawArrowChase(v_arrows, sizeof(v_arrows) / sizeof(DecoArrow), 2, arrow_pink_off_texture, arrow_pink_on_texture);
+
+	DrawArrowChase(right_lane_arrow, 1, 4, arrow_up_orange_off_texture, arrow_up_orange_on_texture);
+	DrawArrowChase(right_lane_triangles, 3, 4, triangle_orange_off_texture, triangle_orange_on_texture);
+
+	DrawArrowChase(tube_triangles, 8, 8, triangle_pink_off_texture, triangle_pink_on_texture, Color{ 255, 255, 255, 150 });
 }
 
 // New round: reset the round values and put a ball on the kicker

@@ -63,10 +63,18 @@ public:
 	Texture2D arrow_blue_on_texture;
 	Texture2D rail_light_dark_texture;
 	Texture2D rail_light_light_texture;
+	Texture2D arrow_pink_off_texture;
+	Texture2D arrow_pink_on_texture;
+	Texture2D arrow_up_orange_off_texture;
+	Texture2D arrow_up_orange_on_texture;
+	Texture2D triangle_orange_off_texture;
+	Texture2D triangle_orange_on_texture;
+	Texture2D triangle_pink_off_texture;
+	Texture2D triangle_pink_on_texture;
 
 	void DrawUI() const;
 	void DrawDecorations() const;
-	void DrawArrowChase(const DecoArrow* arrows, int count, int steps, Texture2D off, Texture2D on) const;
+	void DrawArrowChase(const DecoArrow* arrows, int count, int steps, Texture2D off, Texture2D on, Color tint = WHITE) const;
 	bool Start();
 	update_status Update();
 	bool CleanUp();
