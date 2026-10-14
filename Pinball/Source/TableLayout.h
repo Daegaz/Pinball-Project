@@ -144,3 +144,22 @@ static const DecoArrow center_arrows[] = {
 static const int rail_light_pos[5][2] = {
 	{ 164, 126 }, { 143, 144 }, { 125, 168 }, { 109, 193 }, { 91, 218 }
 };
+
+// Pink arrows under the inverted V, pointing to its two lanes (they blink alternately)
+static const DecoArrow v_arrows[] = {
+	{ 83, 406, 18.0f, 0 }, { 208, 408, -14.0f, 1 },
+};
+
+// Right lane: up arrow + 3 triangles pointing up the diagonal (chase upwards)
+static const DecoArrow right_lane_arrow[] = {
+	{ 399, 399, 23.0f, 0 },
+};
+static const DecoArrow right_lane_triangles[] = {
+	{ 411, 370, 23.0f, 1 }, { 422, 344, 23.0f, 2 }, { 432, 322, 23.0f, 3 },
+};
+
+// Pink triangles inside the kicker tube (drawn translucent, chase upwards)
+static const DecoArrow tube_triangles[] = {
+	{ 483, 533, 0.0f, 0 }, { 483, 497, 0.0f, 1 }, { 483, 464, 0.0f, 2 }, { 483, 424, 0.0f, 3 },
+	{ 483, 387, 0.0f, 4 }, { 483, 352, 0.0f, 5 }, { 483, 312, 0.0f, 6 }, { 483, 275, 0.0f, 7 },
+};
