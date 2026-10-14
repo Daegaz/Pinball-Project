@@ -90,6 +90,8 @@ public:
 	void ResetRailLights();
 	bool rail_combo_showing;             // the 5 are lit, waiting to go back to blinking
 	Timer rail_combo_timer;
+	bool rail_run_active; // a run started (first light touched) and the clock is running
+	Timer rail_run_timer;
 
 	void EndRound();
 	Timer game_over_timer;

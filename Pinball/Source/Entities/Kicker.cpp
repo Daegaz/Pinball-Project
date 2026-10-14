@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#define KICKER_CHARGE_SPEED 6.0f  // m/s the plunger goes down while holding DOWN
+#define KICKER_CHARGE_SPEED 2.0f  // m/s the plunger goes down while holding DOWN
 #define KICKER_MAX_SPEED 35.0f    // m/s launch speed at full charge
 #define KICKER_IDLE_SPEED 2.0f    // m/s to keep the plunger up at rest
 

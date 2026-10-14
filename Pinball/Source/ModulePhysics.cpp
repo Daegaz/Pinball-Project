@@ -2,10 +2,16 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
-
+#include "raymath.h"
 #include "p2Point.h"
 
 #include <math.h>
+
+#define GRAVITY_STEP 1.0f
+#define GRAVITY_MIN 1.0f
+#define GRAVITY_MAX 30.0f
+
+#define MATERIAL_STEP 0.1f // restitution and friction change in steps of 0.1, between 0 and 1
 
 // Target FPS the player can choose in debug mode (keys 1 / 2)
 static const int fps_options[] = { 30, 60, 90, 120, 144 };
@@ -19,6 +25,9 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 	debug = false;
 	accumulator = 0.0f; 
 	fps_index = 1; // 60 FPS
+	gravity = -GRAVITY_Y; // 15
+	ball_restitution = 0.4f;
+	ball_friction = 0.1f;
 }
 
 // Destructor
@@ -33,7 +42,7 @@ bool ModulePhysics::Start()
 	SetTargetFPS(fps_options[fps_index]);
 
 	// Assign the member variable (do NOT declare a local "b2World* world" here, it would shadow the member)
-	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
+	world = new b2World(b2Vec2(GRAVITY_X, gravity));
 
 	world->SetContactListener(this);
 
@@ -372,7 +381,7 @@ PhysBody* ModulePhysics::CreateFlipper(int x, int y, const int* points, int size
 	def.lowerAngle = lower_angle * DEGTORAD;
 	def.upperAngle = upper_angle * DEGTORAD;
 	def.enableMotor = true;
-	def.maxMotorTorque = 100.0f;
+	def.maxMotorTorque = 200.0f;
 	def.motorSpeed = 0.0f;
 
 	*joint = (b2RevoluteJoint*)world->CreateJoint(&def);
@@ -518,11 +527,67 @@ void ModulePhysics::HandleDebugKeys()
 		SetTargetFPS(fps_options[--fps_index]);
 	if (IsKeyPressed(KEY_TWO) && fps_index < fps_options_count - 1)
 		SetTargetFPS(fps_options[++fps_index]);
+
+	// Gravity: 3 lower, 4 higher
+	bool gravity_changed = false;
+	if (IsKeyPressed(KEY_THREE) && gravity > GRAVITY_MIN)
+	{
+		gravity -= GRAVITY_STEP;
+		gravity_changed = true;
+	}
+	if (IsKeyPressed(KEY_FOUR) && gravity < GRAVITY_MAX)
+	{
+		gravity += GRAVITY_STEP;
+		gravity_changed = true;
+	}
+
+	if (gravity_changed)
+	{
+		world->SetGravity(b2Vec2(GRAVITY_X, gravity));
+
+		// Bodies at rest are "asleep" and would ignore the new gravity until something touches them
+		for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
+			b->SetAwake(true);
+	}
+
+	// Ball restitution: 5 lower, 6 higher. Ball friction: 7 lower, 8 higher
+	bool material_changed = false;
+	if (IsKeyPressed(KEY_FIVE)) { ball_restitution -= MATERIAL_STEP; material_changed = true; }
+	if (IsKeyPressed(KEY_SIX)) { ball_restitution += MATERIAL_STEP; material_changed = true; }
+	if (IsKeyPressed(KEY_SEVEN)) { ball_friction -= MATERIAL_STEP; material_changed = true; }
+	if (IsKeyPressed(KEY_EIGHT)) { ball_friction += MATERIAL_STEP; material_changed = true; }
+
+	if (material_changed)
+	{
+		// Keep them in [0, 1] and round to 1 decimal (0.1 is not exact in float: avoids 0.30000001)
+		ball_restitution = roundf(Clamp(ball_restitution, 0.0f, 1.0f) * 10.0f) / 10.0f;
+		ball_friction = roundf(Clamp(ball_friction, 0.0f, 1.0f) * 10.0f) / 10.0f;
+		ApplyBallMaterial();
+	}
 }
 
 // Small panel with the current values and the keys to change them
 void ModulePhysics::DrawDebugPanel() const
 {
-	DrawRectangle(10, 48, 190, 24, Fade(BLACK, 0.75f));
+	DrawRectangle(10, 48, 190, 70, Fade(BLACK, 0.75f));
 	DrawText(TextFormat("FPS %d / %d   [1] [2]", GetFPS(), fps_options[fps_index]), 18, 55, 10, GREEN);
+	DrawText(TextFormat("Gravity %.0f m/s2   [3] [4]", gravity), 18, 69, 10, GREEN);
+	DrawText(TextFormat("Ball bounce %.1f   [5] [6]", ball_restitution), 18, 83, 10, GREEN);
+	DrawText(TextFormat("Ball friction %.1f   [7] [8]", ball_friction), 18, 97, 10, GREEN);
+}
+
+// Applies the current restitution and friction to every ball on the table
+void ModulePhysics::ApplyBallMaterial()
+{
+	for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
+	{
+		b2Fixture* fixture = b->GetFixtureList();
+
+		// The balls are the only dynamic bodies with a circle shape
+		if (b->GetType() == b2_dynamicBody && fixture != NULL && fixture->GetType() == b2Shape::e_circle)
+		{
+			fixture->SetRestitution(ball_restitution);
+			fixture->SetFriction(ball_friction);
+		}
+	}
 }

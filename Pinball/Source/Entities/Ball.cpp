@@ -10,8 +10,8 @@ Ball::Ball(PhysBody* body, Application* app, Texture2D texture)
 	body->body->SetBullet(true);
 
 	b2Fixture* fixture = body->body->GetFixtureList();
-	fixture->SetRestitution(0.4f); // bounciness
-	fixture->SetFriction(0.1f);
+	fixture->SetRestitution(app->physics->GetBallRestitution());
+	fixture->SetFriction(app->physics->GetBallFriction());
 }
 
 void Ball::Update()
