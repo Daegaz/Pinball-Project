@@ -75,4 +75,9 @@ private:
 	b2MouseJoint* mouse_joint;
 
 	float accumulator;
+
+	void HandleDebugKeys();
+	void DrawDebugPanel() const;
+
+	int fps_index; // current option in fps_options
 };

@@ -7,6 +7,10 @@
 
 #include <math.h>
 
+// Target FPS the player can choose in debug mode (keys 1 / 2)
+static const int fps_options[] = { 30, 60, 90, 120, 144 };
+static const int fps_options_count = sizeof(fps_options) / sizeof(int);
+
 ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	world = NULL;
@@ -14,6 +18,7 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 	mouse_joint = NULL;
 	debug = false;
 	accumulator = 0.0f; 
+	fps_index = 1; // 60 FPS
 }
 
 // Destructor
@@ -24,6 +29,8 @@ ModulePhysics::~ModulePhysics()
 bool ModulePhysics::Start()
 {
 	LOG("Creating Physics 2D environment");
+
+	SetTargetFPS(fps_options[fps_index]);
 
 	// Assign the member variable (do NOT declare a local "b2World* world" here, it would shadow the member)
 	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
@@ -75,6 +82,8 @@ update_status ModulePhysics::PostUpdate()
 		}
 		return UPDATE_CONTINUE;
 	}
+
+	HandleDebugKeys();
 
 	b2Vec2 mouse_position(PIXEL_TO_METERS(GetMouseX()), PIXEL_TO_METERS(GetMouseY()));
 	b2Body* body_clicked = NULL;
@@ -195,6 +204,8 @@ update_status ModulePhysics::PostUpdate()
 		world->DestroyJoint(mouse_joint);
 		mouse_joint = NULL;
 	}
+
+	DrawDebugPanel();
 
 	return UPDATE_CONTINUE;
 }
@@ -497,4 +508,21 @@ int PhysBody::RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& no
 	}
 
 	return ret;
+}
+
+// Keys that change the simulation (only in debug mode)
+void ModulePhysics::HandleDebugKeys()
+{
+	// Target FPS: 1 lower, 2 higher
+	if (IsKeyPressed(KEY_ONE) && fps_index > 0)
+		SetTargetFPS(fps_options[--fps_index]);
+	if (IsKeyPressed(KEY_TWO) && fps_index < fps_options_count - 1)
+		SetTargetFPS(fps_options[++fps_index]);
+}
+
+// Small panel with the current values and the keys to change them
+void ModulePhysics::DrawDebugPanel() const
+{
+	DrawRectangle(10, 48, 190, 24, Fade(BLACK, 0.75f));
+	DrawText(TextFormat("FPS %d / %d   [1] [2]", GetFPS(), fps_options[fps_index]), 18, 55, 10, GREEN);
 }
