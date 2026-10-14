@@ -9,7 +9,7 @@ class PhysicEntity;
 // Gravity in m/s^2. Screen Y grows DOWNWARDS and we convert meters <-> pixels without flipping Y,
 // so a POSITIVE Y gravity makes bodies fall down on screen. That is why the world receives -GRAVITY_Y.
 #define GRAVITY_X 0.0f
-#define GRAVITY_Y -7.0f
+#define GRAVITY_Y -15.0f
 
 // Units: Box2D works in meters (float), raylib draws in pixels (int)
 #define PIXELS_PER_METER 50.0f // if touched change METER_PER_PIXEL too
@@ -65,6 +65,9 @@ public:
 
 	bool IsDebug() const { return debug; }
 
+	float GetBallRestitution() const { return ball_restitution; }
+	float GetBallFriction() const { return ball_friction; }
+
 private:
 
 	bool debug;
@@ -75,4 +78,13 @@ private:
 	b2MouseJoint* mouse_joint;
 
 	float accumulator;
+
+	void HandleDebugKeys();
+	void DrawDebugPanel() const;
+	void ApplyBallMaterial();
+
+	int fps_index; // current option in fps_options
+	float gravity; // m/s^2, positive = down on screen (keys 3 / 4)
+	float ball_restitution; // bounciness of the ball (keys 5 / 6)
+	float ball_friction;    // friction of the ball (keys 7 / 8)
 };

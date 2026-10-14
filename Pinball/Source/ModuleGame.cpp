@@ -30,6 +30,7 @@ ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start
 	highest_score = 0;
 	crystals_respawning = false;
 	rail_combo_showing = false;
+	rail_run_active = false;
 }
 
 ModuleGame::~ModuleGame()
@@ -242,6 +243,10 @@ update_status ModuleGame::Update()
 	if (rail_combo_showing && rail_combo_timer.ReadSec() >= RAIL_COMBO_SHOW_TIME)
 		ResetRailLights();
 
+	// Rail lights: run not finished in time -> back to blinking
+	if (rail_run_active && rail_run_timer.ReadSec() >= RAIL_RUN_TIME)
+		ResetRailLights();
+
 	// Kicks from bumpers and slingshots (outside the physics step)
 	for (const Kick& kick : kicks)
 	{
@@ -373,6 +378,9 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			{
 				for (RailLight* light : rail_lights)
 					light->mode = RailLightMode::OFF;
+		
+				rail_run_active = true;
+				rail_run_timer.Start();
 			}
 
 			touched->mode = RailLightMode::LIT;
@@ -388,6 +396,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			if (all_lit)
 			{
 				score += RAIL_COMBO_POINTS;
+				rail_run_active = false;
 				rail_combo_showing = true;
 				rail_combo_timer.Start();
 				LOG("Rail lights complete! +%d", RAIL_COMBO_POINTS);
@@ -438,6 +447,7 @@ void ModuleGame::ResetRailLights()
 		light->mode = RailLightMode::BLINK;
 
 	rail_combo_showing = false;
+	rail_run_active = false;
 }
 
 // Round finished: save the scores and wait for the next round

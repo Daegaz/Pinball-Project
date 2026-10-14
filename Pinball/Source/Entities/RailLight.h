@@ -5,6 +5,7 @@
 #define RAIL_LIGHT_POINTS 10     // each light touched
 #define RAIL_COMBO_POINTS 500    // the 5 lit
 #define RAIL_COMBO_SHOW_TIME 1.0 // seconds all lit before blinking again
+#define RAIL_RUN_TIME 3.0 // seconds to light the 5 from the first touch
 
 class Application;
 
