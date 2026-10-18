@@ -1,6 +1,9 @@
 #pragma once
 #include "Entities/Entity.h"
 #include "raylib.h"
+#include "Application.h"
+
+
 
 class Application;
 class b2PrismaticJoint;

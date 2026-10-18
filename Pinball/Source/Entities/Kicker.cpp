@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
-
+#include "Application.h"
 #include <stdlib.h>
 
 #define KICKER_CHARGE_SPEED 2.0f  // m/s the plunger goes down while holding DOWN
@@ -23,6 +23,7 @@ void Kicker::Update()
 		// Charging: pull the plunger down slowly
 		joint->SetMotorSpeed(KICKER_CHARGE_SPEED);
 		launch_speed = 0.0f;
+		
 	}
 	else
 	{

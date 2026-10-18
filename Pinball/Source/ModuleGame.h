@@ -81,6 +81,7 @@ public:
 
 	void LoadTextures();
 	void CreateTable();
+	void LoadSounds();
 
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB) override;
 	void AddEntity(PhysicEntity* entity);
