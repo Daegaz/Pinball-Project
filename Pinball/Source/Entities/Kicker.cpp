@@ -2,11 +2,11 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
-
+#include "Application.h"
 #include <stdlib.h>
 
 #define KICKER_CHARGE_SPEED 2.0f  // m/s the plunger goes down while holding DOWN
-#define KICKER_MAX_SPEED 35.0f    // m/s launch speed at full charge
+#define KICKER_MAX_SPEED 25.0f    // m/s launch speed at full charge
 #define KICKER_IDLE_SPEED 2.0f    // m/s to keep the plunger up at rest
 
 Kicker::Kicker(PhysBody* body, b2PrismaticJoint* joint, Application* app, Texture2D plunger_texture, Texture2D spring_texture, int x, int bottom_y)
@@ -23,6 +23,7 @@ void Kicker::Update()
 		// Charging: pull the plunger down slowly
 		joint->SetMotorSpeed(KICKER_CHARGE_SPEED);
 		launch_speed = 0.0f;
+		
 	}
 	else
 	{

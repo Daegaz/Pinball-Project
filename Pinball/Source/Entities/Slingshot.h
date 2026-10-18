@@ -4,7 +4,7 @@
 #include "raylib.h"
 
 #define SLINGSHOT_POINTS 50
-#define SLINGSHOT_KICK 5.0f // m/s
+#define SLINGSHOT_KICK 3.0f // m/s
 
 class Application;
 

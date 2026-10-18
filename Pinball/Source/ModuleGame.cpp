@@ -16,7 +16,7 @@
 #include "Entities/LightTarget.h"
 #include "Entities/Crystal.h"
 #include "Entities/RailLight.h"
-
+#include <ctime> 
 #include <algorithm>
 
 #define CHASE_STEP 0.3 // seconds each arrow stays lit in the chase
@@ -51,10 +51,10 @@ bool ModuleGame::Start()
 	LOG("Loading game scene");
 
 	App->renderer->camera.x = App->renderer->camera.y = 0;
-
 	LoadTextures();
 	CreateTable();
 	StartRound();
+	LoadSounds();
 
 	return true;
 }
@@ -194,6 +194,26 @@ void ModuleGame::CreateTable()
 	AddEntity(new Kicker(kicker_body, kicker_joint, App, kicker_plunger_texture, kicker_spring_texture, kicker_x, kicker_bottom_y));
 }
 
+void ModuleGame::LoadSounds() 
+{
+	App->audio->LoadFx("Fx/Ballsound.wav");
+	App->audio->LoadFx("Fx/Ballsound2.wav");
+	App->audio->LoadFx("Fx/Ballsound3.wav");
+	App->audio->LoadFx("Fx/Bumpelectric.wav");
+	App->audio->LoadFx("Fx/Bumper.wav");
+	App->audio->LoadFx("Fx/Bumper2.wav");
+	App->audio->LoadFx("Fx/Chargecoil2.wav");
+	App->audio->LoadFx("Fx/Chargecoil.wav");
+	App->audio->LoadFx("Fx/Hit.wav");
+	App->audio->LoadFx("Fx/Gameover.wav");
+	App->audio->LoadFx("Fx/Musiclevel.wav");
+	App->audio->LoadFx("Fx/Loseball.wav");
+	App->audio->LoadFx("Fx/Newscore.wav");
+	App->audio->LoadFx("Fx/Diamond.wav");
+	App->audio->LoadFx("Fx/Bonus2.wav");
+	App->audio->LoadFx("Fx/Bumper3.wav");
+}
+
 // Unload assets
 bool ModuleGame::CleanUp()
 {
@@ -248,6 +268,7 @@ update_status ModuleGame::Update()
 {
 	DrawTexture(background, 0, 0, WHITE);
 	DrawDecorations();
+
 
 	// Game over: wait a few seconds and start the next round automatically
 	if (state == GameState::GAME_OVER && game_over_timer.ReadSec() >= GAME_OVER_SECONDS)
@@ -311,18 +332,31 @@ update_status ModuleGame::Update()
 
 void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
+	
 	// Bodies created without AddEntity have no entity (e.g. the ground)
 	if (bodyA->entity == NULL || bodyB->entity == NULL)
 		return;
 
 	EntityType type_a = bodyA->entity->GetType();
 	EntityType type_b = bodyB->entity->GetType();
-
+	if (type_a == EntityType::BALL) {
+		std::srand(std::time(nullptr));
+		int numero_aleatorio = std::rand() % (2 - 0 + 1);
+		
+		App->audio->PlayFx(numero_aleatorio);
+	}
+	if (type_a == EntityType::BALL && type_b == EntityType::KICKER && IsKeyDown(KEY_DOWN))
+	{
+		std::srand(std::time(nullptr));
+		
+		App->audio->PlayFx(6);
+		App->audio->PlayFx(7);
+	}
 	// Ball fell into the drain (only react when A is the ball, so it counts once)
 	if (type_a == EntityType::BALL && type_b == EntityType::DEATH_ZONE)
 	{
 		LOG("Ball lost!");
-
+		App->audio->PlayFx(11);
 		// Only mark it: we can't destroy bodies while Box2D is stepping
 		if (std::find(lost_balls.begin(), lost_balls.end(), bodyA->entity) == lost_balls.end())
 			lost_balls.push_back(bodyA->entity);
@@ -332,7 +366,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	{
 		score += BUMPER_POINTS;
 		bodyB->entity->OnHit(bodyA->entity);
-
+		App->audio->PlayFx(15);
 		b2Vec2 direction = bodyA->body->GetPosition() - bodyB->body->GetPosition();
 		direction.Normalize();
 		kicks.push_back({ bodyA->entity, direction.x, direction.y, BUMPER_KICK });
@@ -346,6 +380,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		if (slingshot->IsInFrontOfRubber(METERS_TO_PIXELS(ball_pos.x), METERS_TO_PIXELS(ball_pos.y)))
 		{
 			score += SLINGSHOT_POINTS;
+			App->audio->PlayFx(4);
 			slingshot->OnHit(bodyA->entity);
 			kicks.push_back({ bodyA->entity, slingshot->normal_x, slingshot->normal_y, SLINGSHOT_KICK });
 		}
@@ -355,6 +390,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	{
 		LightTarget* target = (LightTarget*)bodyB->entity;
 		score += TARGET_POINTS;
+		App->audio->PlayFx(8);
 		target->OnHit(bodyA->entity);
 		kicks.push_back({ bodyA->entity, target->kick_x, 0.0f, TARGET_KICK });
 	}
@@ -366,7 +402,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		{
 			crystal->OnHit(bodyA->entity);
 			score += CRYSTAL_POINTS;
-
+			App->audio->PlayFx(13);
 			bool all_collected = true;
 			for (Crystal* c : crystals)
 			{
@@ -380,6 +416,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 				score += CRYSTAL_COMBO_POINTS;
 				crystals_respawning = true;
 				crystal_respawn_timer.Start();
+				App->audio->PlayFx(14);
 				LOG("Combo! Extra ball");
 			}
 		}
@@ -414,6 +451,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			if (all_lit)
 			{
 				score += RAIL_COMBO_POINTS;
+				App->audio->PlayFx(14);
 				rail_run_active = false;
 				rail_combo_showing = true;
 				rail_combo_timer.Start();
@@ -477,6 +515,7 @@ void ModuleGame::EndRound()
 
 	state = GameState::GAME_OVER;
 	LOG("Game over! Score: %d", score);
+	App->audio->PlayFx(9);
 	game_over_timer.Start();
 }
 
@@ -540,6 +579,7 @@ void ModuleGame::StartRound()
 	score = 0;
 	balls_left = BALLS_PER_ROUND;
 	state = GameState::PLAYING;
+	
 	SpawnBall();
 	RespawnCrystals();
 	ResetRailLights();
