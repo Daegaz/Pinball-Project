@@ -20,5 +20,5 @@ void Ball::Update()
 	body->GetPosition(x, y); // center of the body, in pixels
 
 	// Pivot at the center of the sprite (rotation is ignored for now: pending fix n.1)
-	app->renderer->Draw(texture, x, y, NULL, body->GetRotation() * RADTODEG, texture.width / 2, texture.height / 2);
+	app->renderer->Draw(texture, x, y, NULL, body->GetRotation() * RADTODEG, texture.width / 2 , texture.height / 2);
 }

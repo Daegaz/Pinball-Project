@@ -26,8 +26,8 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 	accumulator = 0.0f; 
 	fps_index = 1; // 60 FPS
 	gravity = -GRAVITY_Y; // 15
-	ball_restitution = 0.4f;
-	ball_friction = 0.1f;
+	ball_restitution = 0.2f;
+	ball_friction = 0.5f;
 }
 
 // Destructor
