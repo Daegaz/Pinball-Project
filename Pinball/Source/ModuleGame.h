@@ -13,7 +13,7 @@
 #define GAME_OVER_SECONDS 3.0  // time showing "game over" before the next round starts
 #define BUMPER_KICK 3.0f  // m/s added to the ball when it hits a bumper
 #define INTRO_CREDITS_SECONDS 7.0  // credits screen time before going to "press start"
-#define FX_INTRO 16                // intro sound (index in LoadSounds)
+#define FX_INTRO 15                // intro sound (index in LoadSounds)
 
 enum class GameState
 {

@@ -216,7 +216,6 @@ void ModuleGame::LoadSounds()
 	App->audio->LoadFx("Fx/Chargecoil.wav");
 	App->audio->LoadFx("Fx/Hit.wav");
 	App->audio->LoadFx("Fx/Gameover.wav");
-	App->audio->LoadFx("Fx/Musiclevel.wav");
 	App->audio->LoadFx("Fx/Loseball.wav");
 	App->audio->LoadFx("Fx/Newscore.wav");
 	App->audio->LoadFx("Fx/Diamond.wav");
@@ -386,7 +385,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	if (type_a == EntityType::BALL && type_b == EntityType::DEATH_ZONE)
 	{
 		LOG("Ball lost!");
-		App->audio->PlayFx(11);
+		App->audio->PlayFx(10);
 		// Only mark it: we can't destroy bodies while Box2D is stepping
 		if (std::find(lost_balls.begin(), lost_balls.end(), bodyA->entity) == lost_balls.end())
 			lost_balls.push_back(bodyA->entity);
@@ -396,7 +395,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	{
 		score += BUMPER_POINTS;
 		bodyB->entity->OnHit(bodyA->entity);
-		App->audio->PlayFx(15);
+		App->audio->PlayFx(14);
 		b2Vec2 direction = bodyA->body->GetPosition() - bodyB->body->GetPosition();
 		direction.Normalize();
 		kicks.push_back({ bodyA->entity, direction.x, direction.y, BUMPER_KICK });
@@ -432,7 +431,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		{
 			crystal->OnHit(bodyA->entity);
 			score += CRYSTAL_POINTS;
-			App->audio->PlayFx(13);
+			App->audio->PlayFx(12);
 			bool all_collected = true;
 			for (Crystal* c : crystals)
 			{
@@ -446,7 +445,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 				score += CRYSTAL_COMBO_POINTS;
 				crystals_respawning = true;
 				crystal_respawn_timer.Start();
-				App->audio->PlayFx(14);
+				App->audio->PlayFx(13);
 				LOG("Combo! Extra ball");
 			}
 		}
@@ -481,7 +480,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			if (all_lit)
 			{
 				score += RAIL_COMBO_POINTS;
-				App->audio->PlayFx(14);
+				App->audio->PlayFx(13);
 				rail_run_active = false;
 				rail_combo_showing = true;
 				rail_combo_timer.Start();
