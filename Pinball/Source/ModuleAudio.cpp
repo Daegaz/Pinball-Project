@@ -107,3 +107,15 @@ bool ModuleAudio::PlayFx(unsigned int id, int repeat)
 
 	return ret;
 }
+
+// Stop WAV
+bool ModuleAudio::StopFx(unsigned int id)
+{
+	if (IsEnabled() == false)
+		return false;
+
+	if (id < fx_count && IsSoundPlaying(fx[id]))
+		StopSound(fx[id]);
+
+	return true;
+}

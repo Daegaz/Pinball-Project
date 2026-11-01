@@ -4,7 +4,7 @@
 #include "raylib.h"
 
 #define TARGET_POINTS 50
-#define TARGET_KICK 1.0f // m/s, away from the wall
+#define TARGET_KICK 0.2f // m/s, away from the wall
 
 class Application;
 

@@ -31,12 +31,11 @@ update_status ModuleRender::PreUpdate()
 // Update: debug camera
 update_status ModuleRender::Update()
 {
-    ClearBackground(background);
-
     // NOTE: This function setups render batching system for
     // maximum performance, all consecutive Draw() calls are
     // not processed until EndDrawing() is called
     BeginDrawing();
+	ClearBackground(background);
 
 	return UPDATE_CONTINUE;
 }

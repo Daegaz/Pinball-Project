@@ -23,7 +23,7 @@
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	state = GameState::PLAYING;
+	state = GameState::INTRO;
 	balls_left = BALLS_PER_ROUND;
 	score = 0;
 	previous_score = 0;
@@ -31,6 +31,7 @@ ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start
 	crystals_respawning = false;
 	rail_combo_showing = false;
 	rail_run_active = false;
+	intro_page = 0;
 }
 
 ModuleGame::~ModuleGame()
@@ -48,13 +49,21 @@ static Texture2D LoadSmooth(const char* path)
 // Load assets and build the table
 bool ModuleGame::Start()
 {
-	LOG("Loading game scene");
+	std::srand(std::time(nullptr));
 
-	App->renderer->camera.x = App->renderer->camera.y = 0;
-	LoadTextures();
-	CreateTable();
-	StartRound();
-	LoadSounds();
+	LOG("Loading game scene");
+	if (state == GameState::INTRO)
+	{
+		App->renderer->camera.x = App->renderer->camera.y = 0;
+		
+		timerIntro.Start();
+		LoadTextures();
+		LoadSounds();
+		App->audio->PlayFx(FX_INTRO);
+	}
+	
+		
+	
 
 	return true;
 }
@@ -63,10 +72,10 @@ void ModuleGame::LoadTextures()
 {
 	background = LoadTexture("Assets/background.png"); // drawn 1:1, no filter needed
 	ball_texture = LoadSmooth("Assets/ball.png");
-
+	titlescreen = LoadTexture("Assets/titlescreen.png");
 	flipper_left_texture = LoadSmooth("Assets/left_flipper.png");
 	flipper_right_texture = LoadSmooth("Assets/right_flipper.png");
-
+	start = LoadTexture("Assets/start.png");
 	kicker_plunger_texture = LoadTexture("Assets/kicker_plunger.png");
 	kicker_spring_texture = LoadSmooth("Assets/kicker_3.png");
 
@@ -196,6 +205,7 @@ void ModuleGame::CreateTable()
 
 void ModuleGame::LoadSounds() 
 {
+	
 	App->audio->LoadFx("Fx/Ballsound.wav");
 	App->audio->LoadFx("Fx/Ballsound2.wav");
 	App->audio->LoadFx("Fx/Ballsound3.wav");
@@ -206,14 +216,14 @@ void ModuleGame::LoadSounds()
 	App->audio->LoadFx("Fx/Chargecoil.wav");
 	App->audio->LoadFx("Fx/Hit.wav");
 	App->audio->LoadFx("Fx/Gameover.wav");
-	App->audio->LoadFx("Fx/Musiclevel.wav");
 	App->audio->LoadFx("Fx/Loseball.wav");
 	App->audio->LoadFx("Fx/Newscore.wav");
 	App->audio->LoadFx("Fx/Diamond.wav");
 	App->audio->LoadFx("Fx/Bonus2.wav");
 	App->audio->LoadFx("Fx/Bumper3.wav");
-}
+	App->audio->LoadFx("Fx/kurwa.wav");
 
+}
 // Unload assets
 bool ModuleGame::CleanUp()
 {
@@ -234,6 +244,9 @@ bool ModuleGame::CleanUp()
 		UnloadTexture(target_off_textures[i]);
 		UnloadTexture(target_on_textures[i]);
 	}
+
+	UnloadTexture(titlescreen);
+	UnloadTexture(start);
 	UnloadTexture(triangle_pink_off_texture);
 	UnloadTexture(triangle_pink_on_texture);
 	UnloadTexture(triangle_orange_off_texture);
@@ -266,14 +279,33 @@ bool ModuleGame::CleanUp()
 
 update_status ModuleGame::Update()
 {
-	DrawTexture(background, 0, 0, WHITE);
-	DrawDecorations();
+	if (state != GameState::INTRO) {
+		DrawTexture(background, 0, 0, WHITE);
+		DrawDecorations();
+		
+	}
+	// Intro: credits -> "press start" (Enter or time), and only from "press start" Enter starts the game
+	if (state == GameState::INTRO)
+	{
+		if (intro_page == 0)
+		{
+			if (IsKeyPressed(KEY_ENTER) || timerIntro.ReadSec() >= INTRO_CREDITS_SECONDS)
+				intro_page = 1;
+		}
+		else if (IsKeyPressed(KEY_ENTER))
+		{
+			App->audio->StopFx(FX_INTRO); // cut the intro sound so it doesn't mix with the game
+			state = GameState::PLAYING;
+			CreateTable();
+			StartRound();
+		}
+	}
 
 
 	// Game over: wait a few seconds and start the next round automatically
 	if (state == GameState::GAME_OVER && game_over_timer.ReadSec() >= GAME_OVER_SECONDS)
 		StartRound();
-
+	
 	// Crystals come back a few seconds after the combo
 	if (crystals_respawning && crystal_respawn_timer.ReadSec() >= CRYSTAL_RESPAWN_TIME)
 		RespawnCrystals();
@@ -340,15 +372,12 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	EntityType type_a = bodyA->entity->GetType();
 	EntityType type_b = bodyB->entity->GetType();
 	if (type_a == EntityType::BALL) {
-		std::srand(std::time(nullptr));
 		int numero_aleatorio = std::rand() % (2 - 0 + 1);
 		
 		App->audio->PlayFx(numero_aleatorio);
 	}
 	if (type_a == EntityType::BALL && type_b == EntityType::KICKER && IsKeyDown(KEY_DOWN))
-	{
-		std::srand(std::time(nullptr));
-		
+	{		
 		App->audio->PlayFx(6);
 		App->audio->PlayFx(7);
 	}
@@ -356,7 +385,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	if (type_a == EntityType::BALL && type_b == EntityType::DEATH_ZONE)
 	{
 		LOG("Ball lost!");
-		App->audio->PlayFx(11);
+		App->audio->PlayFx(10);
 		// Only mark it: we can't destroy bodies while Box2D is stepping
 		if (std::find(lost_balls.begin(), lost_balls.end(), bodyA->entity) == lost_balls.end())
 			lost_balls.push_back(bodyA->entity);
@@ -366,7 +395,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	{
 		score += BUMPER_POINTS;
 		bodyB->entity->OnHit(bodyA->entity);
-		App->audio->PlayFx(15);
+		App->audio->PlayFx(14);
 		b2Vec2 direction = bodyA->body->GetPosition() - bodyB->body->GetPosition();
 		direction.Normalize();
 		kicks.push_back({ bodyA->entity, direction.x, direction.y, BUMPER_KICK });
@@ -402,7 +431,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		{
 			crystal->OnHit(bodyA->entity);
 			score += CRYSTAL_POINTS;
-			App->audio->PlayFx(13);
+			App->audio->PlayFx(12);
 			bool all_collected = true;
 			for (Crystal* c : crystals)
 			{
@@ -416,7 +445,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 				score += CRYSTAL_COMBO_POINTS;
 				crystals_respawning = true;
 				crystal_respawn_timer.Start();
-				App->audio->PlayFx(14);
+				App->audio->PlayFx(13);
 				LOG("Combo! Extra ball");
 			}
 		}
@@ -451,7 +480,7 @@ void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			if (all_lit)
 			{
 				score += RAIL_COMBO_POINTS;
-				App->audio->PlayFx(14);
+				App->audio->PlayFx(13);
 				rail_run_active = false;
 				rail_combo_showing = true;
 				rail_combo_timer.Start();
@@ -472,7 +501,7 @@ void ModuleGame::AddEntity(PhysicEntity* entity)
 // New ball resting on the kicker
 void ModuleGame::SpawnBall()
 {
-	AddEntity(new Ball(App->physics->CreateCircle(ball_spawn[0], ball_spawn[1], 10), App, ball_texture));
+	AddEntity(new Ball(App->physics->CreateCircle(ball_spawn[0], ball_spawn[1], 10), App, ball_texture ));
 }
 
 // How many balls are on the table right now
@@ -543,6 +572,15 @@ void ModuleGame::DrawUI() const
 
 		const char* result = TextFormat("Score: %d", previous_score);
 		DrawText(result, (SCREEN_WIDTH - MeasureText(result, 20)) / 2, SCREEN_HEIGHT / 2 + 14, 20, LIGHTGRAY);
+	}
+	else if (state == GameState::INTRO)
+	{
+		Texture2D intro = (intro_page == 0) ? titlescreen : start;
+		DrawTexturePro(intro,
+			{ 0, 0, (float)intro.width, (float)intro.height },
+			{ 0, 0, (float)SCREEN_WIDTH + 400, (float)SCREEN_HEIGHT },
+			{ 200, 0 },
+			0, WHITE);
 	}
 }
 

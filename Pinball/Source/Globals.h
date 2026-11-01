@@ -38,4 +38,4 @@ enum update_status
 #define WIN_BORDERLESS		false
 #define WIN_FULLSCREEN_DESKTOP false
 #define VSYNC				false
-#define TITLE "Physics 2D Playground"
+#define TITLE "Kurwa Pinball"

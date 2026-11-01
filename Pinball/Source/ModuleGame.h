@@ -11,10 +11,13 @@
 
 #define BALLS_PER_ROUND 3
 #define GAME_OVER_SECONDS 3.0  // time showing "game over" before the next round starts
-#define BUMPER_KICK 6.0f  // m/s added to the ball when it hits a bumper
+#define BUMPER_KICK 3.0f  // m/s added to the ball when it hits a bumper
+#define INTRO_CREDITS_SECONDS 7.0  // credits screen time before going to "press start"
+#define FX_INTRO 15                // intro sound (index in LoadSounds)
 
 enum class GameState
 {
+	INTRO,
 	PLAYING,
 	GAME_OVER
 };
@@ -40,7 +43,7 @@ class ModuleGame : public Module
 public:
 	ModuleGame(Application* app, bool start_enabled = true);
 	~ModuleGame();
-
+	Texture2D titlescreen, start;
 	Texture2D background;
 	Texture2D ball_texture;
 	Texture2D flipper_left_texture;
@@ -122,5 +125,7 @@ public:
 	std::vector<Kick> kicks;
 	std::vector<Crystal*> crystals;
 	std::vector<RailLight*> rail_lights; // also in entities: only to handle the group
+	Timer timerIntro;
 
+	int intro_page;  // 0 = credits screen, 1 = "press start" screen
 };
