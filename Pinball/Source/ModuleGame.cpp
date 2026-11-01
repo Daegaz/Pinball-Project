@@ -23,7 +23,7 @@
 
 ModuleGame::ModuleGame(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	state = GameState::PLAYING;
+	state = GameState::INTRO;
 	balls_left = BALLS_PER_ROUND;
 	score = 0;
 	previous_score = 0;
@@ -48,13 +48,21 @@ static Texture2D LoadSmooth(const char* path)
 // Load assets and build the table
 bool ModuleGame::Start()
 {
-	LOG("Loading game scene");
 
-	App->renderer->camera.x = App->renderer->camera.y = 0;
-	LoadTextures();
-	CreateTable();
-	StartRound();
-	LoadSounds();
+	LOG("Loading game scene");
+	if (state == GameState::INTRO)
+	{
+		App->renderer->camera.x = App->renderer->camera.y = 0;
+		DrawUI();
+		
+		timerIntro.Start();
+		LoadTextures();
+		LoadSounds();
+		App->audio->PlayFx(16);
+	}
+	
+		
+	
 
 	return true;
 }
@@ -63,10 +71,10 @@ void ModuleGame::LoadTextures()
 {
 	background = LoadTexture("Assets/background.png"); // drawn 1:1, no filter needed
 	ball_texture = LoadSmooth("Assets/ball.png");
-
+	titlescreen = LoadTexture("Assets/titlescreen.png");
 	flipper_left_texture = LoadSmooth("Assets/left_flipper.png");
 	flipper_right_texture = LoadSmooth("Assets/right_flipper.png");
-
+	start = LoadTexture("Assets/start.png");
 	kicker_plunger_texture = LoadTexture("Assets/kicker_plunger.png");
 	kicker_spring_texture = LoadSmooth("Assets/kicker_3.png");
 
@@ -196,6 +204,7 @@ void ModuleGame::CreateTable()
 
 void ModuleGame::LoadSounds() 
 {
+	
 	App->audio->LoadFx("Fx/Ballsound.wav");
 	App->audio->LoadFx("Fx/Ballsound2.wav");
 	App->audio->LoadFx("Fx/Ballsound3.wav");
@@ -212,8 +221,9 @@ void ModuleGame::LoadSounds()
 	App->audio->LoadFx("Fx/Diamond.wav");
 	App->audio->LoadFx("Fx/Bonus2.wav");
 	App->audio->LoadFx("Fx/Bumper3.wav");
-}
+	App->audio->LoadFx("Fx/kurwa.wav");
 
+}
 // Unload assets
 bool ModuleGame::CleanUp()
 {
@@ -266,14 +276,26 @@ bool ModuleGame::CleanUp()
 
 update_status ModuleGame::Update()
 {
-	DrawTexture(background, 0, 0, WHITE);
-	DrawDecorations();
+	if (state == GameState::PLAYING) {
+		DrawTexture(background, 0, 0, WHITE);
+		DrawDecorations();
+		
+	}
+	if (state == GameState::INTRO && IsKeyPressed(KEY_ENTER)) {
+		state = GameState::PLAYING;
+		
+
+		CreateTable();
+		StartRound();
+		
+
+	}
 
 
 	// Game over: wait a few seconds and start the next round automatically
 	if (state == GameState::GAME_OVER && game_over_timer.ReadSec() >= GAME_OVER_SECONDS)
 		StartRound();
-
+	
 	// Crystals come back a few seconds after the combo
 	if (crystals_respawning && crystal_respawn_timer.ReadSec() >= CRYSTAL_RESPAWN_TIME)
 		RespawnCrystals();
@@ -472,7 +494,7 @@ void ModuleGame::AddEntity(PhysicEntity* entity)
 // New ball resting on the kicker
 void ModuleGame::SpawnBall()
 {
-	AddEntity(new Ball(App->physics->CreateCircle(ball_spawn[0], ball_spawn[1], 10), App, ball_texture));
+	AddEntity(new Ball(App->physics->CreateCircle(ball_spawn[0], ball_spawn[1], 10), App, ball_texture ));
 }
 
 // How many balls are on the table right now
@@ -543,6 +565,30 @@ void ModuleGame::DrawUI() const
 
 		const char* result = TextFormat("Score: %d", previous_score);
 		DrawText(result, (SCREEN_WIDTH - MeasureText(result, 20)) / 2, SCREEN_HEIGHT / 2 + 14, 20, LIGHTGRAY);
+	}
+	else if(state == GameState::INTRO)
+	{
+		
+		int counter = 0;
+		counter += (int)timerIntro.ReadSec();
+		if (counter < 7.0f) {
+			DrawTexturePro(titlescreen,
+				{ 0, 0, (float)titlescreen.width, (float)titlescreen.height },
+				{ 0, 0, (float)SCREEN_WIDTH + 400, (float)SCREEN_HEIGHT },
+				{ 200, 0 },
+				0, WHITE);
+			
+		}
+		else
+		{
+			DrawTexturePro(start,
+				{ 0, 0, (float)titlescreen.width, (float)titlescreen.height },
+				{ 0, 0, (float)SCREEN_WIDTH + 400, (float)SCREEN_HEIGHT },
+				{ 200, 0 },
+				0, WHITE);
+		
+		}
+		
 	}
 }
 

@@ -34,6 +34,8 @@ public:
 	virtual void OnHit(PhysicEntity* other) {}
 
 	EntityType GetType() const { return type; }
+	
+
 
 public:
 	PhysBody* body;
