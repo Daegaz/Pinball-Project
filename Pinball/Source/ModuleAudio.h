@@ -24,6 +24,9 @@ public:
 	// Play a previously loaded sound
 	bool PlayFx(unsigned int fx, int repeat = 0);
 
+	// Stop a sound that is playing
+	bool StopFx(unsigned int fx);
+
 private:
 
 	Music music;
